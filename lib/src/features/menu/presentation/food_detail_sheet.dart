@@ -171,6 +171,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                            foodItemId: widget.item.id,
                            foodName: widget.item.name,
                            date: DateTime.now(),
+                           price: widget.item.price,
                          );
                        }
                        Navigator.pop(context);

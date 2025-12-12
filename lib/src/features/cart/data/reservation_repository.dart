@@ -20,6 +20,7 @@ class ReservationRepository extends _$ReservationRepository {
     required String foodItemId,
     required String foodName,
     required DateTime date,
+    required double price,
   }) async {
     final reservation = Reservation(
       id: _uuid.v4(),
@@ -27,6 +28,7 @@ class ReservationRepository extends _$ReservationRepository {
       foodItemId: foodItemId,
       foodName: foodName,
       date: date,
+      price: price,
     );
     
     _mockReservations.add(reservation);

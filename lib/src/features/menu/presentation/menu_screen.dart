@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/weekly_menu.dart';
 import '../data/mock_menu_repository.dart';
+import '../../../common/widgets/outlook_header.dart'; // Corrected path
 import 'daily_menu_list.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
@@ -20,69 +21,48 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   Widget build(BuildContext context) {
     // 1. Fetch Menu
     final menuAsync = ref.watch(mockMenuRepositoryProvider).getCurrentWeekMenu();
-    final topPadding = MediaQuery.of(context).padding.top;
+
 
     return Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
           // Custom Header (Outlook Style)
-          Container(
-            padding: EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color: Color(0xFF0078D4), // Outlook Blue
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Title
-                const Text(
-                  'Weekly Menu',
-                  style: TextStyle(
-                    fontFamily: 'SF Pro Display',
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Unified Day Selector
-                Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF005A9E), // Darker Blue for background
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(2),
-                  child: Row(
-                    children: DayOfWeek.values.map((day) {
-                      final isSelected = _selectedDay == day;
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _selectedDay = day),
-                          child: Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: isSelected ? Colors.white : Colors.transparent,
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: Text(
-                              _getShortDayName(day),
-                              style: TextStyle(
-                                color: isSelected ? const Color(0xFF0078D4) : Colors.white.withOpacity(0.9),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                              ),
-                            ),
+          OutlookHeader(
+            title: 'Weekly Menu',
+            icon: CupertinoIcons.book, // Menu icon
+            bottomWidget: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFF005A9E), // Darker Blue for background
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.all(2),
+              child: Row(
+                children: DayOfWeek.values.map((day) {
+                  final isSelected = _selectedDay == day;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedDay = day),
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          _getShortDayName(day),
+                          style: TextStyle(
+                            color: isSelected ? const Color(0xFF0078D4) : Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ),
           
