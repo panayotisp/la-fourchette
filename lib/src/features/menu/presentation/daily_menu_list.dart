@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../domain/food_item.dart';
-import '../../cart/data/reservation_repository.dart';
+import 'food_detail_sheet.dart';
 
 class DailyMenuList extends StatelessWidget {
   final List<FoodItem> items;
@@ -29,151 +28,119 @@ class DailyMenuList extends StatelessWidget {
   }
 }
 
-class _FoodItemCard extends ConsumerWidget {
+
+class _FoodItemCard extends StatelessWidget {
   final FoodItem item;
 
   const _FoodItemCard({required this.item});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: CupertinoColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image Placeholder (Rounded Rect)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: item.imageUrl.startsWith('http') 
-              ? Image.network(
-                  item.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showCupertinoModalPopup(
+          context: context,
+          builder: (context) => FoodDetailSheet(item: item),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground, // Fix contrast
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: CupertinoColors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Placeholder (Rounded Rect)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: item.imageUrl.startsWith('http') 
+                ? Image.network(
+                    item.imageUrl,
                     width: 80,
                     height: 80,
-                    color: CupertinoColors.systemGrey5,
-                    child: const Icon(CupertinoIcons.photo, color: CupertinoColors.systemGrey3),
-                  ),
-                )
-              : Image.asset(
-                  item.imageUrl,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                  )
+                : Image.asset(
+                    item.imageUrl,
                     width: 80,
                     height: 80,
-                    color: CupertinoColors.systemGrey5,
-                    child: const Icon(CupertinoIcons.photo, color: CupertinoColors.systemGrey3),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _buildPlaceholder(),
                   ),
-                ),
-          ),
-          const SizedBox(width: 16),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  item.description,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      '€${item.price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: CupertinoColors.activeBlue,
-                      ),
+            ),
+            const SizedBox(width: 16),
+            // Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.5,
+                      color: CupertinoColors.label, // Safe for light/dark
                     ),
-                    const Spacer(),
-                    if (item.stock != null)
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.description,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
                       Text(
-                        '${item.stock} left',
+                        '€${item.price.toStringAsFixed(2)}',
                         style: const TextStyle(
-                          fontSize: 12,
-                          color: CupertinoColors.systemGrey,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoColors.activeBlue,
                         ),
                       ),
-                    const SizedBox(width: 8),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minSize: 0,
-                      onPressed: () {
-                         ref.read(reservationRepositoryProvider.notifier).addReservation(
-                           userId: 'current_user', // Mock user
-                           foodItemId: item.id,
-                           foodName: item.name,
-                           date: DateTime.now(),
-                         );
-                         showCupertinoDialog(
-                           context: context,
-                           builder: (context) => CupertinoAlertDialog(
-                             title: const Text('Confirmed'),
-                             content: Text('You reserved ${item.name}'),
-                             actions: [
-                               CupertinoDialogAction(
-                                 child: const Text('OK'),
-                                 onPressed: () => Navigator.pop(context),
-                               )
-                             ],
-                           ),
-                         );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.activeBlue,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: const Text(
-                          'Reserve',
-                          style: TextStyle(
-                            color: CupertinoColors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                      const Spacer(),
+                      if (item.stock != null)
+                        Text(
+                          '${item.stock} left',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: CupertinoColors.systemGrey,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: CupertinoColors.systemGrey5,
+      child: const Icon(CupertinoIcons.photo, color: CupertinoColors.systemGrey3),
     );
   }
 }
