@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../domain/food_item.dart';
@@ -38,8 +39,11 @@ class _FoodItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        showCupertinoModalPopup(
+        showModalBottomSheet(
           context: context,
+          isScrollControlled: true,
+          useRootNavigator: true, // Fix: Show over bottom nav bar
+          backgroundColor: Colors.transparent,
           builder: (context) => FoodDetailSheet(item: item),
         );
       },
@@ -94,16 +98,7 @@ class _FoodItemCard extends StatelessWidget {
                       color: CupertinoColors.label, // Safe for light/dark
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.description,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: CupertinoColors.secondaryLabel,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  // Description removed
                   const SizedBox(height: 8),
                   Row(
                     children: [

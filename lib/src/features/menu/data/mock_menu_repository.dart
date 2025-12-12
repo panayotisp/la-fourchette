@@ -44,8 +44,9 @@ class MockMenuRepository {
 
   String _getGreekDishName(DayOfWeek day, int index) {
     const dishes = [
-      'Moussaka', 'Souvlaki', 'Spanakopita', 'Gemista', 'Pastitsio',
-      'Gyros', 'Fasolada', 'Greek Salad', 'Tzatziki & Pita', 'Loukoumades'
+      'Φιλέτο κοτόπουλο σχάρας με μουστάρδα, flakes παρμαζάνας και ρύζι βουτύρου', 'Σπαγγέτι μπολονέζ', 'Κρεατόσουπα με λαχανικά',
+      'Μαυρομάτικα με χόρτα και μυρωδικά - live', 'Ρολό κιμά γεμιστό με πατάτες φούρνου',
+      'Παστίτσιο', 'Γλώσσα λεμονάτη με ζεστή πατατοσαλάτα', 'Μπάμιες λαδερές - live', 'Σνίτσελ κοτόπουλο με πατάτες daufhinois', 'Χοιρινή τηγανιά με ρύζι πιλάφι'
     ];
     return '${dishes[(index + day.index) % dishes.length]} (${day.displayName})';
   }

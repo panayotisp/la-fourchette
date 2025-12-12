@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,77 +20,106 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
   Widget build(BuildContext context) {
     // 1. Fetch Menu
     final menuAsync = ref.watch(mockMenuRepositoryProvider).getCurrentWeekMenu();
+    final topPadding = MediaQuery.of(context).padding.top;
 
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Weekly Menu'),
-      ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            // 2. Day Selector
-            _buildDaySelector(),
-            Container(height: 1, color: CupertinoColors.separator),
-            // 3. Content
-            Expanded(
-              child: FutureBuilder<WeeklyMenu>(
-                 future: menuAsync,
-                 builder: (context, snapshot) {
-                   if (snapshot.connectionState == ConnectionState.waiting) {
-                     return const Center(child: CupertinoActivityIndicator());
-                   }
-                   if (snapshot.hasError) {
-                     return Center(child: Text('Error: ${snapshot.error}'));
-                   }
-                   if (!snapshot.hasData) {
-                     return const Center(child: Text('No menu data.'));
-                   }
-
-                   final menu = snapshot.data!;
-                   final dailyItems = menu.getMenuForDay(_selectedDay);
-
-                   return DailyMenuList(items: dailyItems);
-                 }
-              ),
+    return Scaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      body: Column(
+        children: [
+          // Custom Header (Outlook Style)
+          Container(
+            padding: EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Color(0xFF0078D4), // Outlook Blue
             ),
-          ],
-        ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                const Text(
+                  'Weekly Menu',
+                  style: TextStyle(
+                    fontFamily: 'SF Pro Display',
+                    fontSize: 34,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Unified Day Selector
+                Container(
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF005A9E), // Darker Blue for background
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: Row(
+                    children: DayOfWeek.values.map((day) {
+                      final isSelected = _selectedDay == day;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedDay = day),
+                          child: Container(
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.white : Colors.transparent,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Text(
+                              _getShortDayName(day),
+                              style: TextStyle(
+                                color: isSelected ? const Color(0xFF0078D4) : Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // 3. Content
+          Expanded(
+            child: FutureBuilder<WeeklyMenu>(
+               future: menuAsync,
+               builder: (context, snapshot) {
+                 if (snapshot.connectionState == ConnectionState.waiting) {
+                   return const Center(child: CupertinoActivityIndicator());
+                 }
+                 if (snapshot.hasError) {
+                   return Center(child: Text('Error: ${snapshot.error}'));
+                 }
+                 if (!snapshot.hasData) {
+                   return const Center(child: Text('No menu data.'));
+                 }
+
+                 final menu = snapshot.data!;
+                 final dailyItems = menu.getMenuForDay(_selectedDay);
+
+                 return DailyMenuList(items: dailyItems);
+               }
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildDaySelector() {
-    return Container(
-      height: 60,
-      color: CupertinoColors.systemBackground,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: DayOfWeek.values.length,
-        itemBuilder: (context, index) {
-            final day = DayOfWeek.values[index];
-            final isSelected = _selectedDay == day;
-            return GestureDetector(
-              onTap: () => setState(() => _selectedDay = day),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                decoration: BoxDecoration(
-                  color: isSelected ? CupertinoColors.activeBlue : CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  day.displayName,
-                  style: TextStyle(
-                    color: isSelected ? CupertinoColors.white : CupertinoColors.black,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                ),
-              ),
-            );
-        },
-      ),
-    );
+  String _getShortDayName(DayOfWeek day) {
+    switch (day) {
+      case DayOfWeek.monday: return 'Mon';
+      case DayOfWeek.tuesday: return 'Tue';
+      case DayOfWeek.wednesday: return 'Wed';
+      case DayOfWeek.thursday: return 'Thu';
+      case DayOfWeek.friday: return 'Fri';
+    }
   }
 }
