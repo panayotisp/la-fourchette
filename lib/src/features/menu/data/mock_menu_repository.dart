@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 import '../domain/food_item.dart';
 import '../domain/weekly_menu.dart';
 
@@ -12,7 +11,6 @@ MockMenuRepository mockMenuRepository(Ref ref) {
 }
 
 class MockMenuRepository {
-  final _uuid = const Uuid();
 
   Future<WeeklyMenu> getCurrentWeekMenu() async {
     // Simulate network delay
@@ -32,7 +30,7 @@ class MockMenuRepository {
     // Here we generate localized Greek-ish food examples.
     return List.generate(5, (index) {
       return FoodItem(
-        id: _uuid.v4(),
+        id: 'food_${day.name}_$index', // Stable ID based on day and index
         name: _getGreekDishName(day, index),
         description: 'Delicious authentic Greek dish.',
         imageUrl: index % 2 == 0 ? 'assets/images/moussaka.png' : 'assets/images/souvlaki.png',

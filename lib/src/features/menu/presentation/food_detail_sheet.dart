@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../cart/data/reservation_repository.dart';
+import '../../cart/domain/reservation.dart';
 import '../../menu/domain/food_item.dart';
 
 class FoodDetailSheet extends ConsumerStatefulWidget {
@@ -15,6 +16,24 @@ class FoodDetailSheet extends ConsumerStatefulWidget {
 
 class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   int _quantity = 1;
+  int _initialCartQuantity = 0;
+  bool _isInit = true;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      final cartAsync = ref.watch(reservationRepositoryProvider);
+      cartAsync.whenData((reservations) {
+        final count = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed).length;
+        if (count > 0) {
+          _initialCartQuantity = count;
+          _quantity = count;
+        }
+      });
+      _isInit = false;
+    }
+  }
 
   void _increment() {
     setState(() => _quantity++);
@@ -28,6 +47,28 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
 
   @override
   Widget build(BuildContext context) {
+    // Determine Button State
+    // 1. New Item (not in cart) -> "Add to order" (Blue)
+    // 2. In Cart, Quantity Unchanged -> "Remove" (Red)
+    // 3. In Cart, Quantity Changed -> "Update order" (Blue)
+    
+    final bool isInCart = _initialCartQuantity > 0;
+    final bool isQuantityChanged = _quantity != _initialCartQuantity;
+    
+    final bool isRemoveState = isInCart && !isQuantityChanged;
+    final bool isUpdateState = isInCart && isQuantityChanged;
+    
+    // Logic for button
+    final String buttonText = isRemoveState 
+        ? 'Remove' 
+        : (isUpdateState ? 'Update order' : 'Add to order');
+        
+    final Color buttonColor = isRemoveState 
+        ? CupertinoColors.destructiveRed 
+        : CupertinoColors.activeBlue;
+
+    final double totalPrice = widget.item.price * _quantity;
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: const BoxDecoration(
@@ -135,7 +176,12 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
              ),
              child: Row(
                children: [
-                 // Quantity Selector
+                 // Quantity Selector (Only show if NOT in remove state, or always show? 
+                 // User said "price next as it is", implies standard layout but button changes.
+                 // However, "Remove" usually implies removing the item entirely, so quantity selector might be confusing if used to "set removal amount".
+                 // BUT: The requirement says: "If a food already exists... instead of add... I want a red Remove". 
+                 // It also says: "If a food exists... but user has changed amount... Update order".
+                 // This implies standard quantity selector is always active.
                  Container(
                    decoration: BoxDecoration(
                      color: CupertinoColors.systemGrey6,
@@ -158,20 +204,26 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                    ),
                  ),
                  const SizedBox(width: 16),
-                 // Add to Order Button
+                 // Action Button
                  Expanded(
                    child: CupertinoButton(
-                     color: CupertinoColors.activeBlue,
+                     color: buttonColor,
                      borderRadius: BorderRadius.circular(12),
                      onPressed: () {
-                       // Add N reservations
-                       for (int i = 0; i < _quantity; i++) {
-                         ref.read(reservationRepositoryProvider.notifier).addReservation(
-                           userId: 'current_user',
+                       if (isRemoveState) {
+                         // Remove Logic
+                         ref.read(reservationRepositoryProvider.notifier).removeReservation(
                            foodItemId: widget.item.id,
-                           foodName: widget.item.name,
-                           date: DateTime.now(),
-                           price: widget.item.price,
+                         );
+                       } else {
+                         // Add / Update Logic (they share the same "set exact quantity" logic now)
+                         ref.read(reservationRepositoryProvider.notifier).updateReservationQuantity(
+                            userId: 'current_user',
+                            foodItemId: widget.item.id,
+                            foodName: widget.item.name,
+                            date: DateTime.now(),
+                            price: widget.item.price,
+                            newQuantity: _quantity, 
                          );
                        }
                        Navigator.pop(context);
@@ -179,15 +231,15 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                      child: Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
-                         const Text(
-                           'Add to order',
-                           style: TextStyle(
+                         Text(
+                           buttonText,
+                           style: const TextStyle(
                              fontWeight: FontWeight.w600,
                              color: Colors.white,
                            ),
                          ),
                          Text(
-                           '€${(widget.item.price * _quantity).toStringAsFixed(2)}',
+                           '€${totalPrice.toStringAsFixed(2)}',
                            style: const TextStyle(
                              fontWeight: FontWeight.w600,
                              color: Colors.white,
