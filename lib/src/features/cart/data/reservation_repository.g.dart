@@ -20,7 +20,7 @@ final class ReservationRepositoryProvider
         argument: null,
         retry: null,
         name: r'reservationRepositoryProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -34,7 +34,7 @@ final class ReservationRepositoryProvider
 }
 
 String _$reservationRepositoryHash() =>
-    r'7c164a44e28ef24835114a874723a46d3deddcea';
+    r'17d3eba4af9c62ffd5398a060f17d244084b2fe8';
 
 abstract class _$ReservationRepository
     extends $AsyncNotifier<List<Reservation>> {

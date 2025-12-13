@@ -19,9 +19,23 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Fetch Menu
-    final menuAsync = ref.watch(mockMenuRepositoryProvider).getCurrentWeekMenu();
+    // 1. Fetch Menu (Cached)
+    final menuAsync = ref.watch(currentWeekMenuProvider);
 
+
+    // Responsive Width Check
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth > 600;
+
+    // Calculate Date
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final selectedDate = monday.add(Duration(days: _selectedDay.index));
+    
+    // Header Date String
+    final dayName = isWide ? _selectedDay.displayName : _getShortDayName(_selectedDay);
+    final monthName = isWide ? _getFullMonth(selectedDate.month) : _getShortMonth(selectedDate.month);
+    final dateStr = '$dayName, ${selectedDate.day} $monthName';
 
     return Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -29,8 +43,17 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
         children: [
           // Custom Header (Outlook Style)
           OutlookHeader(
-            title: 'Weekly Menu',
+            title: 'Menu',
             icon: CupertinoIcons.book, // Menu icon
+            trailing: Text(
+              dateStr,
+              style: const TextStyle(
+                fontFamily: 'SF Pro Display',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
             bottomWidget: Container(
               height: 40,
               decoration: BoxDecoration(
@@ -51,7 +74,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Text(
-                          _getShortDayName(day),
+                          isWide ? day.displayName : _getShortDayName(day),
                           style: TextStyle(
                             color: isSelected ? const Color(0xFF0078D4) : Colors.white.withValues(alpha: 0.9),
                             fontWeight: FontWeight.w600,
@@ -68,24 +91,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           
           // 3. Content
           Expanded(
-            child: FutureBuilder<WeeklyMenu>(
-               future: menuAsync,
-               builder: (context, snapshot) {
-                 if (snapshot.connectionState == ConnectionState.waiting) {
-                   return const Center(child: CupertinoActivityIndicator());
-                 }
-                 if (snapshot.hasError) {
-                   return Center(child: Text('Error: ${snapshot.error}'));
-                 }
-                 if (!snapshot.hasData) {
-                   return const Center(child: Text('No menu data.'));
-                 }
-
-                 final menu = snapshot.data!;
-                 final dailyItems = menu.getMenuForDay(_selectedDay);
-
-                 return DailyMenuList(items: dailyItems);
-               }
+            child: menuAsync.when(
+              data: (menu) {
+                final dailyItems = menu.getMenuForDay(_selectedDay);
+                return DailyMenuList(items: dailyItems);
+              },
+              loading: () => const Center(child: CupertinoActivityIndicator()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
             ),
           ),
         ],
@@ -101,5 +113,15 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       case DayOfWeek.thursday: return 'Thu';
       case DayOfWeek.friday: return 'Fri';
     }
+  }
+
+  String _getShortMonth(int month) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  }
+
+  String _getFullMonth(int month) {
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    return months[month - 1];
   }
 }

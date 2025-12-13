@@ -10,6 +10,11 @@ MockMenuRepository mockMenuRepository(Ref ref) {
   return MockMenuRepository();
 }
 
+@Riverpod(keepAlive: true)
+Future<WeeklyMenu> currentWeekMenu(Ref ref) {
+  return ref.watch(mockMenuRepositoryProvider).getCurrentWeekMenu();
+}
+
 class MockMenuRepository {
 
   Future<WeeklyMenu> getCurrentWeekMenu() async {
@@ -46,6 +51,6 @@ class MockMenuRepository {
       'Μαυρομάτικα με χόρτα και μυρωδικά - live', 'Ρολό κιμά γεμιστό με πατάτες φούρνου',
       'Παστίτσιο', 'Γλώσσα λεμονάτη με ζεστή πατατοσαλάτα', 'Μπάμιες λαδερές - live', 'Σνίτσελ κοτόπουλο με πατάτες daufhinois', 'Χοιρινή τηγανιά με ρύζι πιλάφι'
     ];
-    return '${dishes[(index + day.index) % dishes.length]} (${day.displayName})';
+    return dishes[(index + day.index) % dishes.length];
   }
 }

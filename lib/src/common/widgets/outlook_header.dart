@@ -5,12 +5,14 @@ class OutlookHeader extends StatelessWidget {
   final String title;
   final Widget? bottomWidget;
   final IconData? icon;
+  final Widget? trailing;
 
   const OutlookHeader({
     super.key,
     required this.title,
     this.bottomWidget,
     this.icon,
+    this.trailing,
   });
 
   @override
@@ -28,28 +30,34 @@ class OutlookHeader extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              if (icon != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+              Row(
+                children: [
+                  if (icon != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: const Color(0xFF0078D4), size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: 'SF Pro Display',
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
                   ),
-                  child: Icon(icon, color: const Color(0xFF0078D4), size: 24),
-                ),
-                const SizedBox(width: 12),
-              ],
-              Text(
-                title,
-                style: const TextStyle(
-                  fontFamily: 'SF Pro Display',
-                  fontSize: 34,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 0.5,
-                ),
+                ],
               ),
+              if (trailing != null) trailing!,
             ],
           ),
           if (bottomWidget != null) ...[

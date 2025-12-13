@@ -56,3 +56,41 @@ final class MockMenuRepositoryProvider
 
 String _$mockMenuRepositoryHash() =>
     r'c9607b3cf7d62f4b3479b04702e2af5575ffaebf';
+
+@ProviderFor(currentWeekMenu)
+const currentWeekMenuProvider = CurrentWeekMenuProvider._();
+
+final class CurrentWeekMenuProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<WeeklyMenu>,
+          WeeklyMenu,
+          FutureOr<WeeklyMenu>
+        >
+    with $FutureModifier<WeeklyMenu>, $FutureProvider<WeeklyMenu> {
+  const CurrentWeekMenuProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'currentWeekMenuProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$currentWeekMenuHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<WeeklyMenu> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<WeeklyMenu> create(Ref ref) {
+    return currentWeekMenu(ref);
+  }
+}
+
+String _$currentWeekMenuHash() => r'c5ef68029e968ab715feb14707a4c1a9c4ab5401';
