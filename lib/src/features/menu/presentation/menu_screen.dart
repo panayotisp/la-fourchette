@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/weekly_menu.dart';
-import '../data/mock_menu_repository.dart';
+import '../data/api_menu_repository.dart'; // Changed from mock to API
 import '../../../common/widgets/outlook_header.dart'; // Corrected path
 import 'daily_menu_list.dart';
 
@@ -15,12 +15,28 @@ class MenuScreen extends ConsumerStatefulWidget {
 }
 
 class _MenuScreenState extends ConsumerState<MenuScreen> {
-  DayOfWeek _selectedDay = DayOfWeek.values[DateTime.now().weekday - 1 >= 5 ? 0 : DateTime.now().weekday - 1]; // Default to today or Monday if weekend
+  late DayOfWeek _selectedDay;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set initial day based on current date
+    final now = DateTime.now();
+    final weekday = now.weekday; // 1=Monday, 7=Sunday
+    
+    if (weekday >= 1 && weekday <= 5) {
+      // Monday-Friday: show current day
+      _selectedDay = DayOfWeek.values[weekday - 1];
+    } else {
+      // Saturday-Sunday: default to Monday
+      _selectedDay = DayOfWeek.monday;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 1. Fetch Menu (Cached)
-    final menuAsync = ref.watch(currentWeekMenuProvider);
+    // 1. Fetch Menu from API (Cached)
+    final menuAsync = ref.watch(currentWeekMenuApiProvider);
 
 
     // Responsive Width Check
@@ -29,7 +45,13 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
 
     // Calculate Date
     final now = DateTime.now();
-    final monday = now.subtract(Duration(days: now.weekday - 1));
+    
+    // If weekend, calculate for NEXT week
+    final effectiveDate = (now.weekday >= 6) 
+        ? now.add(const Duration(days: 7)) 
+        : now;
+    
+    final monday = effectiveDate.subtract(Duration(days: effectiveDate.weekday - 1));
     final selectedDate = monday.add(Duration(days: _selectedDay.index));
     
     // Header Date String
