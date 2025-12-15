@@ -12,20 +12,19 @@ async function getWeeklyMenu(startDate) {
         .input('startDate', sql.Date, startDate)
         .query(`
             SELECT 
-                s.id as schedule_id,
-                s.date,
-                s.price,
-                s.stock_quantity,
-                c.id as food_item_id,
-                c.name,
-                c.name_en,
-                c.image_url,
-                c.image_source
-            FROM dbo.Menu_Schedule s
-            JOIN dbo.Menu_Catalog c ON s.food_item_id = c.id
-            WHERE s.date >= @startDate 
-              AND s.date < DATEADD(DAY, 7, @startDate)
-            ORDER BY s.date
+                w.id as schedule_id,
+                w.date,
+                w.price,
+                w.quantity_available as stock_quantity,
+                w.name_greek_imported as name,
+                f.id as food_library_id,
+                f.name_en,
+                f.image_url
+            FROM dbo.WeekMenu w
+            LEFT JOIN dbo.FoodLibrary f ON w.food_library_id = f.id
+            WHERE w.date >= @startDate 
+              AND w.date < DATEADD(DAY, 7, @startDate)
+            ORDER BY w.date
         `);
 
     // Group by date
@@ -37,11 +36,11 @@ async function getWeeklyMenu(startDate) {
         acc[dateStr].push({
             schedule_id: item.schedule_id,
             food_item: {
-                id: item.food_item_id,
+                id: item.schedule_id, // Use schedule/week_menu ID derived
                 name: item.name,
-                name_en: item.name_en,
-                image_url: item.image_url,
-                image_source: item.image_source
+                name_en: item.name_en || '',
+                image_url: item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c', // Default placeholder
+                image_source: 'database'
             },
             price: parseFloat(item.price),
             stock_quantity: item.stock_quantity

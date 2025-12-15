@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../cart/data/reservation_repository.dart';
+import '../../cart/data/api_reservation_repository.dart';
 import '../../cart/domain/reservation.dart';
 import '../../menu/domain/food_item.dart';
 
@@ -23,9 +23,9 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_isInit) {
-      final cartAsync = ref.watch(reservationRepositoryProvider);
+      final cartAsync = ref.watch(apiReservationRepositoryProvider);
       cartAsync.whenData((reservations) {
-        final count = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed).length;
+        final count = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed).fold(0, (sum, r) => sum + r.quantity);
         if (count > 0) {
           _initialCartQuantity = count;
           _quantity = count;
@@ -212,18 +212,28 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                      onPressed: () {
                        if (isRemoveState) {
                          // Remove Logic
-                         ref.read(reservationRepositoryProvider.notifier).removeReservation(
+                         ref.read(apiReservationRepositoryProvider.notifier).removeReservation(
                            foodItemId: widget.item.id,
                          );
-                       } else {
-                         // Add / Update Logic (they share the same "set exact quantity" logic now)
-                         ref.read(reservationRepositoryProvider.notifier).updateReservationQuantity(
+                       } else if (isUpdateState) {
+                         // Update Logic (Item exists)
+                         ref.read(apiReservationRepositoryProvider.notifier).updateReservationQuantity(
                             userId: 'current_user',
                             foodItemId: widget.item.id,
                             foodName: widget.item.name,
                             date: DateTime.now(),
                             price: widget.item.price,
                             newQuantity: _quantity, 
+                         );
+                       } else {
+                         // Add Logic (New Item)
+                         ref.read(apiReservationRepositoryProvider.notifier).addReservation(
+                            userId: 'current_user',
+                            foodItemId: widget.item.id,
+                            foodName: widget.item.name,
+                            date: DateTime.now(),
+                            price: widget.item.price,
+                            quantity: _quantity,
                          );
                        }
                        Navigator.pop(context);

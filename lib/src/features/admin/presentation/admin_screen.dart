@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../cart/data/reservation_repository.dart';
+import '../../cart/data/api_reservation_repository.dart';
+import '../../cart/domain/reservation.dart';
 
 class AdminScreen extends ConsumerWidget {
   const AdminScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reservationsAsync = ref.watch(reservationRepositoryProvider);
+    final reservationsAsync = ref.watch(apiReservationRepositoryProvider);
 
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(

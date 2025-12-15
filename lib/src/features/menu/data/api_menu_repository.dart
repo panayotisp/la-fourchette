@@ -56,13 +56,19 @@ class ApiMenuRepository {
       final date = DateTime.parse(day['date']);
       final dayOfWeek = _getDayOfWeek(date.weekday);
       
-      final items = (day['items'] as List<dynamic>).map((item) {
+      final List<FoodItem> items = (day['items'] as List<dynamic>).map((item) {
         final foodItem = item['food_item'];
+        
+        String imageUrl = foodItem['image_url'] ?? '';
+        if (imageUrl.startsWith('/')) {
+          imageUrl = '${ApiConfig.baseUrl}$imageUrl';
+        }
+
         return FoodItem(
           id: item['schedule_id'],
           name: foodItem['name'],
           description: foodItem['name_en'] ?? '',
-          imageUrl: foodItem['image_url'] ?? '',
+          imageUrl: imageUrl,
           price: (item['price'] as num).toDouble(),
           stock: item['stock_quantity'],
         );

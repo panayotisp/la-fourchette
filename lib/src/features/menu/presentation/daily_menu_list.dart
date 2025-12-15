@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/food_item.dart';
-import '../../cart/data/reservation_repository.dart';
+import '../../cart/data/api_reservation_repository.dart';
 import '../../cart/domain/reservation.dart';
 import 'food_detail_sheet.dart';
 
@@ -41,9 +41,9 @@ class _FoodItemCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch cart to get quantity
-    final cartAsync = ref.watch(reservationRepositoryProvider);
+    final cartAsync = ref.watch(apiReservationRepositoryProvider);
     final quantity = cartAsync.when(
-      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.confirmed).length,
+      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.confirmed).fold(0, (sum, r) => sum + r.quantity),
       loading: () => 0,
       error: (_, __) => 0,
     );
@@ -59,7 +59,7 @@ class _FoodItemCard extends ConsumerWidget {
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           // Swipe Right -> Add 1 (User requested: "Drag a card to the right... to Add")
-          ref.read(reservationRepositoryProvider.notifier).addReservation(
+          ref.read(apiReservationRepositoryProvider.notifier).addReservation(
             userId: 'current_user',
             foodItemId: item.id,
             foodName: item.name,
@@ -69,7 +69,7 @@ class _FoodItemCard extends ConsumerWidget {
           return false; // Don't dismiss
         } else if (direction == DismissDirection.endToStart) {
           // Swipe Left -> Remove All ("Drag a card to the left... to Remove")
-          ref.read(reservationRepositoryProvider.notifier).removeReservation(foodItemId: item.id);
+          ref.read(apiReservationRepositoryProvider.notifier).removeReservation(foodItemId: item.id);
           return false; // Don't dismiss
         }
         return false;

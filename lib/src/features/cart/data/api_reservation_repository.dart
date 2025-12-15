@@ -11,9 +11,41 @@ part 'api_reservation_repository.g.dart';
 class ApiReservationRepository extends _$ApiReservationRepository {
   @override
   Future<List<Reservation>> build() async {
-    // Load initial orders from backend
-    // For now, return empty list - will implement user-specific loading
-    return [];
+    return _fetchUserOrders('current_user'); // TODO: Use real user ID
+  }
+
+  Future<List<Reservation>> _fetchUserOrders(String userId) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.ordersEndpoint}?user_email=$userId');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map<Reservation>((json) {
+           String imageUrl = json['image_url'] ?? '';
+           if (imageUrl.startsWith('/')) {
+              imageUrl = '${ApiConfig.baseUrl}$imageUrl';
+           }
+           
+           return Reservation(
+             id: json['id'],
+             userId: json['user_email'],
+             foodItemId: json['schedule_id'],
+             foodName: json['food_name'] ?? json['food_name_en'], // Prefer Greek (imported name)
+             date: DateTime.parse(json['menu_date']),
+             price: (json['price'] as num).toDouble(),
+             quantity: json['quantity'] as int,
+             status: json['status'] == 'cart' ? ReservationStatus.confirmed : ReservationStatus.confirmed, 
+             orderType: json['order_type'] == 'to_go' ? ReservationOrderType.toGo : ReservationOrderType.restaurant,
+           );
+        }).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      print('Error fetching orders: $e');
+      return [];
+    }
   }
 
   Future<void> addReservation({
@@ -22,6 +54,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
     required String foodName,
     required DateTime date,
     required double price,
+    int quantity = 1, // Added quantity parameter
     String userName = 'John',
     String userSurname = 'Doe',
     String orderType = 'restaurant',
@@ -37,15 +70,14 @@ class ApiReservationRepository extends _$ApiReservationRepository {
           'user_name': userName,
           'user_surname': userSurname,
           'schedule_id': foodItemId,
-          'quantity': 1,
+          'quantity': quantity, // Use param
           'order_type': orderType,
         }),
       );
 
       if (response.statusCode == 201) {
-        // Successfully created
-        // TODO: Refresh state from server
-        state = AsyncData([...state.value ?? []]);
+        // Refresh state to get the new ID and data from server
+        ref.invalidateSelf(); 
       } else {
         throw Exception('Failed to create order: ${response.statusCode}');
       }
@@ -55,17 +87,64 @@ class ApiReservationRepository extends _$ApiReservationRepository {
   }
 
   Future<void> updateReservationQuantity({
-    required String foodItemId,
+    required String userId,
+    required String foodItemId, 
+    required String foodName, // Unused but kept for signature compatibility if needed
+    required DateTime date,   // Unused
+    required double price,    // Unused
     required int newQuantity,
   }) async {
-    // TODO: Implement when we have order IDs in state
-    final currentState = state.value ?? [];
-    state = AsyncData(currentState);
+    // 1. Find the order ID for this food item in our current state
+    final currentReservations = state.value ?? [];
+    
+    try {
+      final reservation = currentReservations.firstWhere(
+        (r) => r.foodItemId == foodItemId,
+        orElse: () => throw Exception('Order not found in local state'),
+      );
+      
+      final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.ordersEndpoint}/${reservation.id}');
+      
+      final response = await http.patch(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'quantity': newQuantity,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ref.invalidateSelf();
+      } else {
+        throw Exception('Failed to update order: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error updating order: $e');
+    }
   }
 
   Future<void> removeReservation({required String foodItemId}) async {
-    // TODO: Implement when we have order IDs in state
-    final currentState = state.value ?? [];
-    state = AsyncData(currentState);
+    // 1. Find the order ID
+    final currentReservations = state.value ?? [];
+    try {
+      final reservation = currentReservations.firstWhere(
+        (r) => r.foodItemId == foodItemId,
+        orElse: () => throw Exception('Order not found in local state'),
+      );
+
+      final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.ordersEndpoint}/${reservation.id}');
+      
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        ref.invalidateSelf();
+      } else {
+         throw Exception('Failed to delete order: ${response.statusCode}');
+      }
+    } catch (e) {
+      // If not found locally, maybe it's already gone, just refresh to be safe
+      ref.invalidateSelf();
+      print('Error removing reservation: $e');
+    }
   }
 }

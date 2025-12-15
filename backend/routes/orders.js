@@ -66,7 +66,7 @@ router.patch('/:id', async (req, res) => {
             return res.status(400).json({ error: 'quantity is required' });
         }
 
-        const order = await orderService.updateOrder(id, quantity);
+        const order = await orderService.updateOrderQuantity(id, quantity);
         res.json(order);
     } catch (error) {
         console.error('Error updating order:', error);

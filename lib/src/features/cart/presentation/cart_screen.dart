@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../common/widgets/outlook_header.dart';
-import '../../cart/data/reservation_repository.dart';
+import '../data/api_reservation_repository.dart';
 import '../../cart/domain/reservation.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -10,7 +10,7 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cartAsync = ref.watch(reservationRepositoryProvider);
+    final cartAsync = ref.watch(apiReservationRepositoryProvider);
 
 
     return Scaffold(
@@ -46,7 +46,7 @@ class CartScreen extends ConsumerWidget {
                   }
                 }
                 
-                final total = reservations.fold(0.0, (sum, item) => sum + (item.status == ReservationStatus.confirmed ? item.price : 0));
+                final total = reservations.fold(0.0, (sum, item) => sum + (item.status == ReservationStatus.confirmed ? item.price * item.quantity : 0));
 
                 return Column(
                   children: [
@@ -58,7 +58,8 @@ class CartScreen extends ConsumerWidget {
                           final itemId = groupedItems.keys.elementAt(index);
                           final items = groupedItems[itemId]!;
                           final firstItem = items.first;
-                          final quantity = items.length;
+                          // Sum quantity of all rows for this item (robustness)
+                          final quantity = items.fold(0, (sum, r) => sum + r.quantity);
                           final itemTotal = firstItem.price * quantity;
 
                           return Container(

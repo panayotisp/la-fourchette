@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-enum ReservationStatus { confirmed, cancelled }
+enum ReservationStatus { pending, confirmed, cancelled }
+
+enum ReservationOrderType { restaurant, toGo }
 
 class Reservation extends Equatable {
   final String id;
@@ -11,6 +13,9 @@ class Reservation extends Equatable {
   final double price; // Store price per item
   final ReservationStatus status;
 
+  final int quantity;
+  final ReservationOrderType orderType;
+
   const Reservation({
     required this.id,
     required this.userId,
@@ -18,9 +23,11 @@ class Reservation extends Equatable {
     required this.foodName,
     required this.date,
     required this.price,
-    this.status = ReservationStatus.confirmed,
+    this.status = ReservationStatus.pending,
+    this.quantity = 1,
+    this.orderType = ReservationOrderType.restaurant,
   });
 
   @override
-  List<Object?> get props => [id, userId, foodItemId, foodName, date, price, status];
+  List<Object?> get props => [id, userId, foodItemId, foodName, date, price, status, quantity, orderType];
 }
