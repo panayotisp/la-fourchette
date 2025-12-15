@@ -18,6 +18,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   int _quantity = 1;
   int _initialCartQuantity = 0;
   bool _isInit = true;
+  ReservationOrderType _selectedOrderType = ReservationOrderType.restaurant;
 
   @override
   void didChangeDependencies() {
@@ -25,10 +26,15 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
     if (_isInit) {
       final cartAsync = ref.watch(apiReservationRepositoryProvider);
       cartAsync.whenData((reservations) {
-        final count = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed).fold(0, (sum, r) => sum + r.quantity);
+        final existingItems = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed);
+        final count = existingItems.fold(0, (sum, r) => sum + r.quantity);
         if (count > 0) {
           _initialCartQuantity = count;
           _quantity = count;
+          // Set initial order type from existing reservation (take the first one)
+          if (existingItems.isNotEmpty) {
+            _selectedOrderType = existingItems.first.orderType;
+          }
         }
       });
       _isInit = false;
@@ -136,34 +142,63 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
            
            Expanded(
              child: SingleChildScrollView(
-               child: Column(
-                 crossAxisAlignment: CrossAxisAlignment.start,
-                 children: [
-                   Padding(
-                     padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                     child: Text(
-                       widget.item.name,
-                       style: const TextStyle(
-                         fontSize: 28,
-                         fontWeight: FontWeight.bold,
-                         letterSpacing: -0.5,
-                         color: CupertinoColors.label,
+               child: SizedBox(
+                 width: double.infinity, // Force full width for left alignment
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     Padding(
+                       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                       child: Text(
+                         widget.item.name,
+                         style: const TextStyle(
+                           fontSize: 28,
+                           fontWeight: FontWeight.bold,
+                           letterSpacing: -0.5,
+                           color: CupertinoColors.label,
+                         ),
                        ),
                      ),
-                   ),
-                   
-                   Padding(
-                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                     child: Text(
-                       '€${widget.item.price.toStringAsFixed(2)}',
-                       style: const TextStyle(
-                         fontSize: 24,
-                         fontWeight: FontWeight.w600,
-                         color: CupertinoColors.activeBlue, // Or red if matching the design
+                     
+                     Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                       child: Text(
+                         '€${widget.item.price.toStringAsFixed(2)}',
+                         style: const TextStyle(
+                           fontSize: 24,
+                           fontWeight: FontWeight.w600,
+                           color: CupertinoColors.activeBlue, // Or red if matching the design
+                         ),
                        ),
                      ),
-                   ),
-                 ],
+
+                     // Order Type Selector
+                     Padding(
+                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                       child: SizedBox(
+                         width: double.infinity,
+                         child: CupertinoSlidingSegmentedControl<ReservationOrderType>(
+                           groupValue: _selectedOrderType,
+                           children: const {
+                             ReservationOrderType.restaurant: Padding(
+                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                               child: Text('Restaurant'),
+                             ),
+                             ReservationOrderType.toGo: Padding(
+                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                               child: Text('Pickup'),
+                             ),
+                           },
+                           onValueChanged: (value) {
+                             if (value != null) {
+                               setState(() => _selectedOrderType = value);
+                             }
+                           },
+                         ),
+                       ),
+                     ),
+                   ],
+                 ),
                ),
              ),
            ),
@@ -176,12 +211,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
              ),
              child: Row(
                children: [
-                 // Quantity Selector (Only show if NOT in remove state, or always show? 
-                 // User said "price next as it is", implies standard layout but button changes.
-                 // However, "Remove" usually implies removing the item entirely, so quantity selector might be confusing if used to "set removal amount".
-                 // BUT: The requirement says: "If a food already exists... instead of add... I want a red Remove". 
-                 // It also says: "If a food exists... but user has changed amount... Update order".
-                 // This implies standard quantity selector is always active.
+                 // Quantity Selector
                  Container(
                    decoration: BoxDecoration(
                      color: CupertinoColors.systemGrey6,
@@ -234,6 +264,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                             date: DateTime.now(),
                             price: widget.item.price,
                             quantity: _quantity,
+                            orderType: _selectedOrderType == ReservationOrderType.toGo ? 'to_go' : 'restaurant',
                          );
                        }
                        Navigator.pop(context);
