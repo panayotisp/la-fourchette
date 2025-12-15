@@ -54,19 +54,35 @@ async function getOrdersByUser(userEmail) {
     return result.recordset;
 }
 
-async function updateOrderQuantity(orderId, quantity) {
+async function updateOrder(orderId, updates) {
     const pool = await getConnection();
 
-    await pool.request()
-        .input('id', sql.UniqueIdentifier, orderId)
-        .input('quantity', sql.Int, quantity)
-        .query(`
-            UPDATE dbo.Orders
-            SET quantity = @quantity
-            WHERE id = @id
-        `);
+    const request = pool.request()
+        .input('id', sql.UniqueIdentifier, orderId);
 
-    return { id: orderId, quantity };
+    let setClauses = [];
+
+    if (updates.quantity !== undefined) {
+        request.input('quantity', sql.Int, updates.quantity);
+        setClauses.push('quantity = @quantity');
+    }
+
+    if (updates.order_type !== undefined) {
+        request.input('order_type', sql.NVarChar, updates.order_type);
+        setClauses.push('order_type = @order_type');
+    }
+
+    if (setClauses.length === 0) return { id: orderId }; // Nothing to update
+
+    const query = `
+        UPDATE dbo.Orders
+        SET ${setClauses.join(', ')}
+        WHERE id = @id
+    `;
+
+    await request.query(query);
+
+    return { id: orderId, ...updates };
 }
 
 async function deleteOrder(orderId) {
@@ -82,6 +98,6 @@ async function deleteOrder(orderId) {
 module.exports = {
     createOrder,
     getOrdersByUser,
-    updateOrderQuantity,
+    updateOrder, // Export updated function
     deleteOrder
 };

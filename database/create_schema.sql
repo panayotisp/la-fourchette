@@ -41,7 +41,7 @@ CREATE TABLE dbo.Orders (
     user_surname NVARCHAR(255),
     menu_item_id UNIQUEIDENTIFIER NOT NULL, -- References WeekMenu
     quantity INT NOT NULL DEFAULT 1,
-    order_type NVARCHAR(50) DEFAULT 'restaurant', -- 'restaurant' or 'to_go'
+    order_type NVARCHAR(50) DEFAULT 'restaurant', -- 'restaurant' or 'pickup'
     status NVARCHAR(50) DEFAULT 'confirmed',
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (menu_item_id) REFERENCES dbo.WeekMenu(id)

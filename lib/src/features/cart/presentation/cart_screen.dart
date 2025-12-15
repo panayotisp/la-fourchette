@@ -121,17 +121,17 @@ class CartScreen extends ConsumerWidget {
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                               decoration: BoxDecoration(
-                                                color: firstItem.orderType == ReservationOrderType.toGo 
+                                                color: firstItem.orderType == ReservationOrderType.pickup 
                                                     ? CupertinoColors.systemOrange.withOpacity(0.1) 
                                                     : CupertinoColors.activeBlue.withOpacity(0.1),
                                                 borderRadius: BorderRadius.circular(4),
                                               ),
                                               child: Text(
-                                                firstItem.orderType == ReservationOrderType.toGo ? 'Pickup' : 'Restaurant',
+                                                firstItem.orderType == ReservationOrderType.pickup ? 'Pickup' : 'Restaurant',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
-                                                  color: firstItem.orderType == ReservationOrderType.toGo 
+                                                  color: firstItem.orderType == ReservationOrderType.pickup 
                                                       ? CupertinoColors.systemOrange
                                                       : CupertinoColors.activeBlue,
                                                 ),

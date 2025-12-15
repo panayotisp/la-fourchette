@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 enum ReservationStatus { pending, confirmed, cancelled }
 
-enum ReservationOrderType { restaurant, toGo }
+enum ReservationOrderType { restaurant, pickup }
 
 class Reservation extends Equatable {
   final String id;

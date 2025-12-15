@@ -36,14 +36,13 @@ class ApiReservationRepository extends _$ApiReservationRepository {
              price: (json['price'] as num).toDouble(),
              quantity: json['quantity'] as int,
              status: json['status'] == 'cart' ? ReservationStatus.confirmed : ReservationStatus.confirmed, 
-             orderType: json['order_type'] == 'to_go' ? ReservationOrderType.toGo : ReservationOrderType.restaurant,
+             orderType: json['order_type'] == 'pickup' ? ReservationOrderType.pickup : ReservationOrderType.restaurant,
            );
         }).toList();
       } else {
         return [];
       }
     } catch (e) {
-      print('Error fetching orders: $e');
       return [];
     }
   }
@@ -54,7 +53,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
     required String foodName,
     required DateTime date,
     required double price,
-    int quantity = 1, // Added quantity parameter
+    int quantity = 1,
     String userName = 'John',
     String userSurname = 'Doe',
     String orderType = 'restaurant',
@@ -70,7 +69,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
           'user_name': userName,
           'user_surname': userSurname,
           'schedule_id': foodItemId,
-          'quantity': quantity, // Use param
+          'quantity': quantity,
           'order_type': orderType,
         }),
       );
@@ -86,13 +85,14 @@ class ApiReservationRepository extends _$ApiReservationRepository {
     }
   }
 
-  Future<void> updateReservationQuantity({
+  Future<void> updateReservation({
     required String userId,
     required String foodItemId, 
     required String foodName, // Unused but kept for signature compatibility if needed
     required DateTime date,   // Unused
     required double price,    // Unused
     required int newQuantity,
+    required String newOrderType,
   }) async {
     // 1. Find the order ID for this food item in our current state
     final currentReservations = state.value ?? [];
@@ -110,6 +110,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'quantity': newQuantity,
+          'order_type': newOrderType,
         }),
       );
 
@@ -144,7 +145,6 @@ class ApiReservationRepository extends _$ApiReservationRepository {
     } catch (e) {
       // If not found locally, maybe it's already gone, just refresh to be safe
       ref.invalidateSelf();
-      print('Error removing reservation: $e');
     }
   }
 }

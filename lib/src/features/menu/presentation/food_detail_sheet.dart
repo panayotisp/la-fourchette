@@ -19,6 +19,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   int _initialCartQuantity = 0;
   bool _isInit = true;
   ReservationOrderType _selectedOrderType = ReservationOrderType.restaurant;
+  ReservationOrderType _initialOrderType = ReservationOrderType.restaurant; // To track changes
 
   @override
   void didChangeDependencies() {
@@ -34,6 +35,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
           // Set initial order type from existing reservation (take the first one)
           if (existingItems.isNotEmpty) {
             _selectedOrderType = existingItems.first.orderType;
+            _initialOrderType = existingItems.first.orderType;
           }
         }
       });
@@ -60,9 +62,11 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
     
     final bool isInCart = _initialCartQuantity > 0;
     final bool isQuantityChanged = _quantity != _initialCartQuantity;
+    final bool isOrderTypeChanged = _selectedOrderType != _initialOrderType;
     
-    final bool isRemoveState = isInCart && !isQuantityChanged;
-    final bool isUpdateState = isInCart && isQuantityChanged;
+    final bool isRemoveState = isInCart && !isQuantityChanged && !isOrderTypeChanged;
+    // Update if in cart and (quantity changed OR type changed)
+    final bool isUpdateState = isInCart && (isQuantityChanged || isOrderTypeChanged);
     
     // Logic for button
     final String buttonText = isRemoveState 
@@ -184,7 +188,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                child: Text('Restaurant'),
                              ),
-                             ReservationOrderType.toGo: Padding(
+                             ReservationOrderType.pickup: Padding(
                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                                child: Text('Pickup'),
                              ),
@@ -247,13 +251,14 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                          );
                        } else if (isUpdateState) {
                          // Update Logic (Item exists)
-                         ref.read(apiReservationRepositoryProvider.notifier).updateReservationQuantity(
+                         ref.read(apiReservationRepositoryProvider.notifier).updateReservation(
                             userId: 'current_user',
                             foodItemId: widget.item.id,
                             foodName: widget.item.name,
                             date: DateTime.now(),
                             price: widget.item.price,
                             newQuantity: _quantity, 
+                            newOrderType: _selectedOrderType == ReservationOrderType.pickup ? 'pickup' : 'restaurant',
                          );
                        } else {
                          // Add Logic (New Item)
@@ -264,7 +269,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                             date: DateTime.now(),
                             price: widget.item.price,
                             quantity: _quantity,
-                            orderType: _selectedOrderType == ReservationOrderType.toGo ? 'to_go' : 'restaurant',
+                            orderType: _selectedOrderType == ReservationOrderType.pickup ? 'pickup' : 'restaurant',
                          );
                        }
                        Navigator.pop(context);

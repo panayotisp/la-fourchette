@@ -55,18 +55,24 @@ router.get('/', async (req, res) => {
 
 /**
  * PATCH /api/orders/:id
- * Update order quantity
+ * Update order (quantity or order_type)
  */
 router.patch('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { quantity } = req.body;
+        const { quantity, order_type } = req.body;
 
-        if (!quantity) {
-            return res.status(400).json({ error: 'quantity is required' });
+        if (quantity === undefined && order_type === undefined) {
+            return res.status(400).json({ error: 'At least one field (quantity, order_type) is required' });
         }
 
-        const order = await orderService.updateOrderQuantity(id, quantity);
+        const updates = {};
+        if (quantity !== undefined) updates.quantity = quantity;
+        if (order_type !== undefined) {
+            updates.order_type = order_type;
+        }
+
+        const order = await orderService.updateOrder(id, updates);
         res.json(order);
     } catch (error) {
         console.error('Error updating order:', error);
