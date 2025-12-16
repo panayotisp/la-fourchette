@@ -116,7 +116,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             child: menuAsync.when(
               data: (menu) {
                 final dailyItems = menu.getMenuForDay(_selectedDay);
-                return DailyMenuList(items: dailyItems);
+                return DailyMenuList(items: dailyItems, date: selectedDate);
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
               error: (err, stack) => Center(child: Text('Error: $err')),

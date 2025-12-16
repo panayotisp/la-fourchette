@@ -6,25 +6,70 @@ const { getConnection, sql } = require('../config/database');
 async function createOrder(orderData) {
     const pool = await getConnection();
 
-    const result = await pool.request()
+    // 1. Check if similar order exists
+    const checkResult = await pool.request()
         .input('user_email', sql.NVarChar, orderData.user_email)
-        .input('user_name', sql.NVarChar, orderData.user_name)
-        .input('user_surname', sql.NVarChar, orderData.user_surname)
         .input('menu_item_id', sql.UniqueIdentifier, orderData.schedule_id) // Map schedule_id to menu_item_id
-        .input('quantity', sql.Int, orderData.quantity)
         .input('order_type', sql.NVarChar, orderData.order_type)
-        .input('status', sql.NVarChar, 'cart')  // Default to 'cart'
         .query(`
-            INSERT INTO dbo.Orders (user_email, user_name, user_surname, menu_item_id, quantity, order_type, status)
-            OUTPUT INSERTED.id
-            VALUES (@user_email, @user_name, @user_surname, @menu_item_id, @quantity, @order_type, @status)
+            SELECT id, quantity 
+            FROM dbo.Orders 
+            WHERE user_email = @user_email 
+              AND menu_item_id = @menu_item_id 
+              AND order_type = @order_type 
+              AND status = 'cart'
         `);
 
-    return result.recordset[0];
+    if (checkResult.recordset.length > 0) {
+        // 2. Update existing: Merge logic
+        const existingOrder = checkResult.recordset[0];
+        const newQuantity = existingOrder.quantity + (orderData.quantity || 1);
+
+        await pool.request()
+            .input('id', sql.UniqueIdentifier, existingOrder.id)
+            .input('quantity', sql.Int, newQuantity)
+            .query(`UPDATE dbo.Orders SET quantity = @quantity WHERE id = @id`);
+
+        return {
+            id: existingOrder.id,
+            ...orderData,
+            quantity: newQuantity,
+            status: 'cart'
+        };
+    } else {
+        // 3. Insert new: Existing logic
+        const result = await pool.request()
+            .input('user_email', sql.NVarChar, orderData.user_email)
+            .input('user_name', sql.NVarChar, orderData.user_name)
+            .input('user_surname', sql.NVarChar, orderData.user_surname)
+            .input('menu_item_id', sql.UniqueIdentifier, orderData.schedule_id)
+            .input('quantity', sql.Int, orderData.quantity)
+            .input('order_type', sql.NVarChar, orderData.order_type)
+            .input('status', sql.NVarChar, 'cart')
+            .query(`
+                INSERT INTO dbo.Orders (user_email, user_name, user_surname, menu_item_id, quantity, order_type, status)
+                OUTPUT INSERTED.id
+                VALUES (@user_email, @user_name, @user_surname, @menu_item_id, @quantity, @order_type, @status)
+            `);
+
+        return result.recordset[0];
+    }
 }
 
 async function getOrdersByUser(userEmail) {
     const pool = await getConnection();
+
+    // Auto-cleanup: Delete 'cart' items from the past
+    await pool.request()
+        .input('user_email_del', sql.NVarChar, userEmail)
+        .query(`
+            DELETE o
+            FROM dbo.Orders o
+            JOIN dbo.WeekMenu w ON o.menu_item_id = w.id
+            WHERE o.user_email = @user_email_del
+              AND o.status = 'cart'
+              AND w.date < CAST(GETDATE() AS DATE)
+        `);
 
     const result = await pool.request()
         .input('user_email', sql.NVarChar, userEmail)
