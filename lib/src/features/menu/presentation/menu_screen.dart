@@ -6,6 +6,8 @@ import '../domain/weekly_menu.dart';
 import '../data/api_menu_repository.dart'; // Changed from mock to API
 import '../../../common/widgets/outlook_header.dart'; // Corrected path
 import 'daily_menu_list.dart';
+import '../domain/greek_holidays.dart'; // Fixed import path
+import 'widgets/holiday_view.dart';
 
 class MenuScreen extends ConsumerStatefulWidget {
   const MenuScreen({super.key});
@@ -113,13 +115,37 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
           
           // 3. Content
           Expanded(
-            child: menuAsync.when(
-              data: (menu) {
-                final dailyItems = menu.getMenuForDay(_selectedDay);
-                return DailyMenuList(items: dailyItems, date: selectedDate);
-              },
-              loading: () => const Center(child: CupertinoActivityIndicator()),
-              error: (err, stack) => Center(child: Text('Error: $err')),
+            child:Builder(
+              builder: (context) {
+                // Check for Holiday
+                final holidayName = GreekHolidays.getHolidayName(selectedDate);
+                
+                if (holidayName != null) {
+                  return HolidayView(
+                    holidayName: holidayName,
+                     onNextDay: () {
+                      // Find next day index (cycling 0-4 for Mon-Fri)
+                      final nextIndex = (_selectedDay.index + 1);
+                      if (nextIndex < 5) { // Only if next day is Fri or earlier
+                        setState(() => _selectedDay = DayOfWeek.values[nextIndex]);
+                      } else {
+                         // Loop back to Monday? Or maybe they want to see next week? 
+                         // For simplicity, let's just go to Monday
+                         setState(() => _selectedDay = DayOfWeek.monday);
+                      }
+                    },
+                  );
+                }
+
+                return menuAsync.when(
+                  data: (menu) {
+                    final dailyItems = menu.getMenuForDay(_selectedDay);
+                    return DailyMenuList(items: dailyItems, date: selectedDate);
+                  },
+                  loading: () => const Center(child: CupertinoActivityIndicator()),
+                  error: (err, stack) => Center(child: Text('Error: $err')),
+                );
+              }
             ),
           ),
         ],
