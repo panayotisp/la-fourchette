@@ -121,9 +121,14 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                 final holidayName = GreekHolidays.getHolidayName(selectedDate);
                 
                 if (holidayName != null) {
+                  // Determine if we should show "Next Day" button
+                  // If it's Friday (5), Saturday (6), or Sunday (7), "Tomorrow" is weekend/next week 
+                  // and the user specifically requested no button on Fridays because app only shows weekdays.
+                  final isFriday = selectedDate.weekday == DateTime.friday;
+                  
                   return HolidayView(
                     holidayName: holidayName,
-                     onNextDay: () {
+                     onNextDay: isFriday ? null : () {
                       // Find next day index (cycling 0-4 for Mon-Fri)
                       final nextIndex = (_selectedDay.index + 1);
                       if (nextIndex < 5) { // Only if next day is Fri or earlier

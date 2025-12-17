@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../menu/presentation/menu_screen.dart';
 import '../../cart/presentation/cart_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
+import '../../cart/data/api_reservation_repository.dart';
+import '../../cart/domain/reservation.dart';
 
-class EmployeeHomeScaffold extends StatefulWidget {
+class EmployeeHomeScaffold extends ConsumerStatefulWidget {
   const EmployeeHomeScaffold({super.key});
 
   @override
-  State<EmployeeHomeScaffold> createState() => _EmployeeHomeScaffoldState();
+  ConsumerState<EmployeeHomeScaffold> createState() => _EmployeeHomeScaffoldState();
 }
 
-class _EmployeeHomeScaffoldState extends State<EmployeeHomeScaffold> {
+class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
   int _currentIndex = 0;
 
   final List<Widget> _tabs = [
@@ -23,6 +26,16 @@ class _EmployeeHomeScaffoldState extends State<EmployeeHomeScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch cart count
+    final cartAsync = ref.watch(apiReservationRepositoryProvider);
+    final int cartCount = cartAsync.when(
+      data: (reservations) => reservations
+          .where((item) => item.status == ReservationStatus.pending)
+          .fold(0, (sum, item) => sum + item.quantity),
+      loading: () => 0,
+      error: (_, __) => 0,
+    );
+
     return Scaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: IndexedStack(
@@ -51,16 +64,46 @@ class _EmployeeHomeScaffoldState extends State<EmployeeHomeScaffold> {
           },
           activeColor: const Color(0xFF0078D4), // Match Outlook Blue
           inactiveColor: CupertinoColors.systemGrey,
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.home),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.cart),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(CupertinoIcons.cart),
+                  if (cartCount > 0)
+                    Positioned(
+                      right: -8,
+                      top: -4,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: CupertinoColors.systemRed,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          '$cartCount',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               label: 'Cart',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(CupertinoIcons.person),
               label: 'Profile',
             ),

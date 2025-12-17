@@ -4,11 +4,25 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'common/theme/app_theme.dart';
 import 'routing/app_router.dart';
 
-class LaFourchetteApp extends ConsumerWidget {
+import 'common/services/notification_service.dart';
+
+class LaFourchetteApp extends ConsumerStatefulWidget {
   const LaFourchetteApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<LaFourchetteApp> createState() => _LaFourchetteAppState();
+}
+
+class _LaFourchetteAppState extends ConsumerState<LaFourchetteApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize notifications
+    Future.microtask(() => ref.read(notificationServiceProvider).init());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final goRouter = ref.watch(goRouterProvider);
 
     return CupertinoApp.router(

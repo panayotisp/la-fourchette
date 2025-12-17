@@ -51,7 +51,7 @@ class _FoodItemCard extends ConsumerWidget {
     // Watch cart to get quantity
     final cartAsync = ref.watch(apiReservationRepositoryProvider);
     final quantity = cartAsync.when(
-      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.confirmed).fold(0, (sum, r) => sum + r.quantity),
+      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.pending).fold(0, (sum, r) => sum + r.quantity),
       loading: () => 0,
       error: (_, __) => 0,
     );

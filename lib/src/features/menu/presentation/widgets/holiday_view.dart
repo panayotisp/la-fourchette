@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
 class HolidayView extends StatelessWidget {
   final String holidayName;
-  final VoidCallback onNextDay;
+  final VoidCallback? onNextDay;
 
   const HolidayView({
     super.key, 
     required this.holidayName,
-    required this.onNextDay,
+    this.onNextDay,
   });
 
   @override
@@ -61,11 +61,12 @@ class HolidayView extends StatelessWidget {
             const SizedBox(height: 32),
             
             // Action Button
-            CupertinoButton.filled(
-              borderRadius: BorderRadius.circular(30),
-              onPressed: onNextDay,
-              child: const Text('See Tomorrow\'s Menu'),
-            ),
+            if (onNextDay != null)
+              CupertinoButton.filled(
+                borderRadius: BorderRadius.circular(30),
+                onPressed: onNextDay,
+                child: const Text('See Tomorrow\'s Menu'),
+              ),
           ],
         ),
       ),

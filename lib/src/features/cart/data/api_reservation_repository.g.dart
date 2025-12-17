@@ -35,7 +35,7 @@ final class ApiReservationRepositoryProvider
 }
 
 String _$apiReservationRepositoryHash() =>
-    r'8fb529d360fa16aec4b54c2b49671add5943b312';
+    r'b762ea34015f94df29974646e4d1edc30c6e9636';
 
 abstract class _$ApiReservationRepository
     extends $AsyncNotifier<List<Reservation>> {

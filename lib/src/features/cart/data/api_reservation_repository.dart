@@ -35,7 +35,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
              date: DateTime.parse(json['menu_date']),
              price: (json['price'] as num).toDouble(),
              quantity: json['quantity'] as int,
-             status: json['status'] == 'cart' ? ReservationStatus.confirmed : ReservationStatus.confirmed, 
+             status: json['status'] == 'cart' ? ReservationStatus.pending : ReservationStatus.confirmed, 
              orderType: json['order_type'] == 'pickup' ? ReservationOrderType.pickup : ReservationOrderType.restaurant,
            );
         }).toList();
@@ -145,6 +145,27 @@ class ApiReservationRepository extends _$ApiReservationRepository {
     } catch (e) {
       // If not found locally, maybe it's already gone, just refresh to be safe
       ref.invalidateSelf();
+    }
+  }
+
+  Future<void> checkout(String userId) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.ordersEndpoint}/checkout');
+      
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'user_email': userId}),
+      );
+
+      if (response.statusCode == 200) {
+        // Refresh local state (cart should become empty)
+        ref.invalidateSelf(); 
+      } else {
+        throw Exception('Failed to checkout: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error checking out: $e');
     }
   }
 }
