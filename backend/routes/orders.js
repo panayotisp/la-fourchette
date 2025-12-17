@@ -95,4 +95,24 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+/**
+ * POST /api/orders/checkout
+ * Confirm all items in cart
+ */
+router.post('/checkout', async (req, res) => {
+    try {
+        const { user_email } = req.body;
+
+        if (!user_email) {
+            return res.status(400).json({ error: 'user_email is required' });
+        }
+
+        await orderService.confirmOrder(user_email);
+        res.json({ success: true, message: 'Order confirmed successfully' });
+    } catch (error) {
+        console.error('Error confirming order:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;

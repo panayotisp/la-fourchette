@@ -140,9 +140,24 @@ async function deleteOrder(orderId) {
     return { success: true };
 }
 
+async function confirmOrder(userEmail) {
+    const pool = await getConnection();
+
+    await pool.request()
+        .input('user_email', sql.NVarChar, userEmail)
+        .query(`
+            UPDATE dbo.Orders
+            SET status = 'confirmed'
+            WHERE user_email = @user_email AND status = 'cart'
+        `);
+
+    return { success: true };
+}
+
 module.exports = {
     createOrder,
     getOrdersByUser,
-    updateOrder, // Export updated function
-    deleteOrder
+    updateOrder,
+    deleteOrder,
+    confirmOrder
 };
