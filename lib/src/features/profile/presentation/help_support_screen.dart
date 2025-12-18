@@ -126,7 +126,7 @@ class HelpSupportScreen extends StatelessWidget {
           color: CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: CupertinoColors.activeBlue, size: 24),
+        child: Icon(icon, color: const Color(0xFF2C6B6B), size: 24),
       ),
       title: Text(
         title,

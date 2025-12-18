@@ -81,34 +81,55 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             bottomWidget: Container(
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF005A9E), // Darker Blue for background
+                color: const Color(0xFFB4FF39), // Light Green for background
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.all(2),
-              child: Row(
-                children: DayOfWeek.values.map((day) {
-                  final isSelected = _selectedDay == day;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedDay = day),
+              child: Stack(
+                children: [
+                  // Animated sliding indicator
+                  AnimatedAlign(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment(
+                      -1 + (2 * _selectedDay.index / (DayOfWeek.values.length - 1)),
+                      0,
+                    ),
+                    child: FractionallySizedBox(
+                      widthFactor: 1 / DayOfWeek.values.length,
                       child: Container(
-                        alignment: Alignment.center,
+                        margin: const EdgeInsets.all(0),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.white : Colors.transparent,
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Text(
-                          isWide ? day.displayName : _getShortDayName(day),
-                          style: TextStyle(
-                            color: isSelected ? const Color(0xFF0078D4) : Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
-                          ),
                         ),
                       ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                  // Day labels
+                  Row(
+                    children: DayOfWeek.values.map((day) {
+                      final isSelected = _selectedDay == day;
+                      return Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => setState(() => _selectedDay = day),
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              isWide ? day.displayName : _getShortDayName(day),
+                              style: TextStyle(
+                                color: isSelected ? const Color(0xFF2C6B6B) : const Color(0xFF2C6B6B).withOpacity(0.7),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
           ),

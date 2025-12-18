@@ -75,7 +75,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
         
     final Color buttonColor = isRemoveState 
         ? CupertinoColors.destructiveRed 
-        : CupertinoColors.activeBlue;
+        : const Color(0xFF2C6B6B); // Dark Green
 
     final double totalPrice = widget.item.price * _quantity;
 
@@ -171,7 +171,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                          style: const TextStyle(
                            fontSize: 24,
                            fontWeight: FontWeight.w600,
-                           color: CupertinoColors.activeBlue, // Or red if matching the design
+                           color: Color(0xFF2C6B6B), // Dark Green
                          ),
                        ),
                      ),
@@ -226,13 +226,13 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                        CupertinoButton(
                          padding: const EdgeInsets.symmetric(horizontal: 12),
                          onPressed: _decrement,
-                         child: const Text('-', style: TextStyle(fontSize: 24, color: CupertinoColors.activeBlue)),
+                          child: const Text('-', style: TextStyle(fontSize: 24, color: Color(0xFF2C6B6B))),
                        ),
                        Text('$_quantity', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                        CupertinoButton(
                          padding: const EdgeInsets.symmetric(horizontal: 12),
                          onPressed: _increment,
-                         child: const Text('+', style: TextStyle(fontSize: 24, color: CupertinoColors.activeBlue)),
+                          child: const Text('+', style: TextStyle(fontSize: 24, color: Color(0xFF2C6B6B))),
                        ),
                      ],
                    ),

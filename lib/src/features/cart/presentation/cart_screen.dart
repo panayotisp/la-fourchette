@@ -125,7 +125,7 @@ class CartScreen extends ConsumerWidget {
                                             decoration: BoxDecoration(
                                               color: firstItem.orderType == ReservationOrderType.pickup 
                                                   ? CupertinoColors.systemOrange.withOpacity(0.1) 
-                                                  : CupertinoColors.activeBlue.withOpacity(0.1),
+                                                  : const Color(0xFF2C6B6B).withOpacity(0.1),
                                               borderRadius: BorderRadius.circular(4),
                                             ),
                                             child: Text(
@@ -135,7 +135,7 @@ class CartScreen extends ConsumerWidget {
                                                 fontWeight: FontWeight.w600,
                                                 color: firstItem.orderType == ReservationOrderType.pickup 
                                                     ? CupertinoColors.systemOrange
-                                                    : CupertinoColors.activeBlue,
+                                                    : const Color(0xFF2C6B6B),
                                               ),
                                             ),
                                           ),
@@ -177,14 +177,15 @@ class CartScreen extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Total', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                Text('€${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: CupertinoColors.activeBlue)),
+                                Text('€${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C6B6B))),
                               ],
                             ),
                             const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
-                              child: CupertinoButton.filled(
-                                child: const Text('Checkout', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: CupertinoButton(
+                                color: const Color(0xFF2C6B6B), // Dark Green
+                                borderRadius: BorderRadius.circular(12),
                                 onPressed: () {
                                   // Checkout Flow
                                 showCupertinoModalPopup(
@@ -257,6 +258,7 @@ class CartScreen extends ConsumerWidget {
                                   ),
                                 );
                               },
+                              child: const Text('Checkout', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                               ),
                             ),
                           ],

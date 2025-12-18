@@ -25,7 +25,7 @@ class OutlookHeader extends StatelessWidget {
       padding: EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFF0078D4), // Outlook Blue
+        color: Color(0xFF2C6B6B), // Dark Green
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,7 @@ class OutlookHeader extends StatelessWidget {
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, color: const Color(0xFF0078D4), size: 24),
+                      child: Icon(icon, color: const Color(0xFF2C6B6B), size: 24),
                     ),
                     const SizedBox(width: 12),
                   ],

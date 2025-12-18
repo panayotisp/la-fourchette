@@ -62,7 +62,7 @@ class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
               _currentIndex = index;
             });
           },
-          activeColor: const Color(0xFF0078D4), // Match Outlook Blue
+          activeColor: const Color(0xFF2C6B6B), // Dark Green
           inactiveColor: CupertinoColors.systemGrey,
           items: [
             const BottomNavigationBarItem(

@@ -92,7 +92,7 @@ class _FoodItemCard extends ConsumerWidget {
                       if (hasQuantity)
                         Container(
                           width: 4,
-                          color: CupertinoColors.activeBlue, // Simple rect, let ClipRRect handle corners
+                          color: const Color(0xFF2C6B6B), // Dark Green - cart indicator
                         ),
                       
                       // 2. Content
@@ -121,7 +121,7 @@ class _FoodItemCard extends ConsumerWidget {
                                           if (hasQuantity)
                                             TextSpan(
                                               text: '$cartQuantity x ',
-                                              style: const TextStyle(color: CupertinoColors.activeBlue),
+                                              style: const TextStyle(color: Color(0xFF2C6B6B)),
                                             ),
                                           TextSpan(text: item.name),
                                         ],
@@ -130,10 +130,10 @@ class _FoodItemCard extends ConsumerWidget {
                                     const SizedBox(height: 8),
                                     Text(
                                       '€${item.price.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: isPast ? CupertinoColors.systemGrey3 : CupertinoColors.activeBlue,
+                                       style: TextStyle(
+                                         fontSize: 15,
+                                         fontWeight: FontWeight.bold,
+                                         color: isPast ? CupertinoColors.systemGrey3 : const Color(0xFF2C6B6B),
                                       ),
                                     ),
                                     if (isPast)
@@ -222,7 +222,7 @@ class _FoodItemCard extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.only(left: 20),
         decoration: BoxDecoration(
-          color: CupertinoColors.activeBlue,
+          color: const Color(0xFF2C6B6B), // Dark Green
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerLeft,
