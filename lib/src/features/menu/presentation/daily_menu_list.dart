@@ -49,13 +49,12 @@ class _FoodItemCard extends ConsumerWidget {
     final isPast = menuDate.isBefore(today);
 
     // Watch cart to get quantity
-    final cartAsync = ref.watch(apiReservationRepositoryProvider);
-    final quantity = cartAsync.when(
-      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.pending).fold(0, (sum, r) => sum + r.quantity),
+    final cartQuantity = ref.watch(apiReservationRepositoryProvider).when(
+      data: (reservations) => reservations.where((r) => r.foodItemId == item.id && r.status == ReservationStatus.cart).fold(0, (sum, r) => sum + r.quantity),
       loading: () => 0,
       error: (_, __) => 0,
     );
-    final hasQuantity = quantity > 0;
+    final hasQuantity = cartQuantity > 0;
 
     Widget cardContent = GestureDetector(
        onTap: isPast ? null : () {
@@ -121,7 +120,7 @@ class _FoodItemCard extends ConsumerWidget {
                                         children: [
                                           if (hasQuantity)
                                             TextSpan(
-                                              text: '$quantity x ',
+                                              text: '$cartQuantity x ',
                                               style: const TextStyle(color: CupertinoColors.activeBlue),
                                             ),
                                           TextSpan(text: item.name),

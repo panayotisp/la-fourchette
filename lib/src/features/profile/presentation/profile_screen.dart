@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const Divider(height: 1, indent: 56), // 16 + 24 + 16 (padding + icon + padding)
                       _buildMenuRow(
-                        icon: CupertinoIcons.question_circle,
+                        icon: CupertinoIcons.question,
                         title: 'Help & Support',
                         onTap: () {
                           Navigator.of(context).push(

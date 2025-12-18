@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum ReservationStatus { pending, confirmed, cancelled }
+enum ReservationStatus { cart, completed, cancelled }
 
 enum ReservationOrderType { restaurant, pickup }
 
@@ -23,7 +23,7 @@ class Reservation extends Equatable {
     required this.foodName,
     required this.date,
     required this.price,
-    this.status = ReservationStatus.pending,
+    this.status = ReservationStatus.cart,
     this.quantity = 1,
     this.orderType = ReservationOrderType.restaurant,
   });

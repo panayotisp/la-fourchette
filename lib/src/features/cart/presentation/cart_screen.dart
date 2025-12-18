@@ -26,7 +26,7 @@ class CartScreen extends ConsumerWidget {
             child: cartAsync.when(
               data: (allReservations) {
                 // Filter only active cart items
-                final reservations = allReservations.where((r) => r.status == ReservationStatus.pending).toList();
+                final reservations = allReservations.where((r) => r.status == ReservationStatus.cart).toList();
 
                 if (reservations.isEmpty) {
                   return Center(

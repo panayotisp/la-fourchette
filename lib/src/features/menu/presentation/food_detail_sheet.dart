@@ -27,7 +27,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
     if (_isInit) {
       final cartAsync = ref.watch(apiReservationRepositoryProvider);
       cartAsync.whenData((reservations) {
-        final existingItems = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.confirmed);
+        final existingItems = reservations.where((r) => r.foodItemId == widget.item.id && r.status == ReservationStatus.cart);
         final count = existingItems.fold(0, (sum, r) => sum + r.quantity);
         if (count > 0) {
           _initialCartQuantity = count;

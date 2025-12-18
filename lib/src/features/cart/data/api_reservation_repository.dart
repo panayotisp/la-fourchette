@@ -35,7 +35,7 @@ class ApiReservationRepository extends _$ApiReservationRepository {
              date: DateTime.parse(json['menu_date']),
              price: (json['price'] as num).toDouble(),
              quantity: json['quantity'] as int,
-             status: json['status'] == 'cart' ? ReservationStatus.pending : ReservationStatus.confirmed, 
+             status: json['status'] == 'cart' ? ReservationStatus.cart : ReservationStatus.completed, 
              orderType: json['order_type'] == 'pickup' ? ReservationOrderType.pickup : ReservationOrderType.restaurant,
            );
         }).toList();

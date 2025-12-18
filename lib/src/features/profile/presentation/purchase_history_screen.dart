@@ -25,9 +25,9 @@ class PurchaseHistoryScreen extends ConsumerWidget {
           Expanded(
             child: cartAsync.when(
               data: (allReservations) {
-                // 1. Filter for Confirmed items only
+                // 1. Filter for Completed items only
                 final confirmedOrders = allReservations
-                    .where((r) => r.status == ReservationStatus.confirmed)
+                    .where((r) => r.status == ReservationStatus.completed)
                     .toList();
 
                 // 2. Sort by Date Descending (Newest first)
@@ -112,7 +112,7 @@ class _OrderHistoryCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Text(
-                  'Confirmed',
+                  'Completed',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

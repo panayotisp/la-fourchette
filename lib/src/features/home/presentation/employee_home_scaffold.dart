@@ -30,7 +30,7 @@ class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
     final cartAsync = ref.watch(apiReservationRepositoryProvider);
     final int cartCount = cartAsync.when(
       data: (reservations) => reservations
-          .where((item) => item.status == ReservationStatus.pending)
+          .where((item) => item.status == ReservationStatus.cart)
           .fold(0, (sum, item) => sum + item.quantity),
       loading: () => 0,
       error: (_, __) => 0,
