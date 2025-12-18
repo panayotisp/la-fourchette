@@ -6,6 +6,7 @@ class OutlookHeader extends StatelessWidget {
   final Widget? bottomWidget;
   final IconData? icon;
   final Widget? trailing;
+  final VoidCallback? onBack;
 
   const OutlookHeader({
     super.key,
@@ -13,6 +14,7 @@ class OutlookHeader extends StatelessWidget {
     this.bottomWidget,
     this.icon,
     this.trailing,
+    this.onBack,
   });
 
   @override
@@ -34,6 +36,15 @@ class OutlookHeader extends StatelessWidget {
             children: [
               Row(
                 children: [
+                  if (onBack != null) ...[
+                    GestureDetector(
+                      onTap: onBack,
+                      child: Container(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: const Icon(CupertinoIcons.arrow_left, color: Colors.white, size: 28),
+                      ),
+                    ),
+                  ],
                   if (icon != null) ...[
                     Container(
                       padding: const EdgeInsets.all(8),

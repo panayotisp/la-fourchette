@@ -66,45 +66,54 @@ class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
           inactiveColor: CupertinoColors.systemGrey,
           items: [
             const BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.home),
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6.0), // ADJUST THIS VALUE to move icon up/down
+                child: Icon(CupertinoIcons.home),
+              ),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(CupertinoIcons.cart),
-                  if (cartCount > 0)
-                    Positioned(
-                      right: -8,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: CupertinoColors.systemRed,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        child: Text(
-                          '$cartCount',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
+              icon: Padding(
+                padding: const EdgeInsets.only(top: 6.0), // ADJUST THIS VALUE to move icon up/down
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(CupertinoIcons.cart),
+                    if (cartCount > 0)
+                      Positioned(
+                        right: -8,
+                        top: -4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: CupertinoColors.systemRed,
+                            shape: BoxShape.circle,
                           ),
-                          textAlign: TextAlign.center,
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            '$cartCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
               label: 'Cart',
             ),
             const BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person),
+              icon: Padding(
+                padding: EdgeInsets.only(top: 6.0), // ADJUST THIS VALUE to move icon up/down
+                child: Icon(CupertinoIcons.person),
+              ),
               label: 'Profile',
             ),
           ],

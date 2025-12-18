@@ -152,7 +152,7 @@ class CartScreen extends ConsumerWidget {
                       },
                     ),
                     
-                    // Floating Overlay Footer
+                    // Fl§ Footer
                     Positioned(
                       left: 0,
                       right: 0,
