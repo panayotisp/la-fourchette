@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../features/auth/presentation/role_selection_screen.dart';
 import '../features/admin/presentation/admin_screen.dart';
-import '../features/home/presentation/employee_home_scaffold.dart';
+import '../common/widgets/main_scaffold.dart';
 
 part 'app_router.g.dart';
 
@@ -19,7 +19,7 @@ GoRouter goRouter(Ref ref) {
       ),
       GoRoute(
         path: '/menu',
-        builder: (context, state) => const EmployeeHomeScaffold(),
+        builder: (context, state) => const MainScaffold(),
       ),
       GoRoute(
         path: '/admin',

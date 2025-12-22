@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../menu/presentation/menu_screen.dart';
-import '../../cart/presentation/cart_screen.dart';
-import '../../profile/presentation/profile_screen.dart';
-import '../../cart/data/api_reservation_repository.dart';
-import '../../cart/domain/reservation.dart';
+import '../../features/menu/presentation/menu_screen.dart';
+import '../../features/cart/presentation/cart_screen.dart';
+import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/cart/data/api_reservation_repository.dart';
+import '../../features/cart/domain/reservation.dart';
 
-class EmployeeHomeScaffold extends ConsumerStatefulWidget {
-  const EmployeeHomeScaffold({super.key});
+class MainScaffold extends ConsumerStatefulWidget {
+  const MainScaffold({super.key});
 
   @override
-  ConsumerState<EmployeeHomeScaffold> createState() => _EmployeeHomeScaffoldState();
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
 }
 
-class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int _currentIndex = 0;
 
   final List<Widget> _tabs = [
@@ -62,7 +63,7 @@ class _EmployeeHomeScaffoldState extends ConsumerState<EmployeeHomeScaffold> {
               _currentIndex = index;
             });
           },
-          activeColor: const Color(0xFF2C6B6B), // Dark Green
+          activeColor: AppTheme.darkGreen,
           inactiveColor: CupertinoColors.systemGrey,
           items: [
             const BottomNavigationBarItem(

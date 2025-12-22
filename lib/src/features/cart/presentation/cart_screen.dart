@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../common/widgets/outlook_header.dart';
+import '../../../common/widgets/app_header.dart';
 import '../data/api_reservation_repository.dart';
 import '../../../common/services/notification_service.dart';
 import '../../cart/domain/reservation.dart';
+import '../../../common/theme/app_theme.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({super.key});
@@ -18,7 +19,7 @@ class CartScreen extends ConsumerWidget {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
-          const OutlookHeader(
+          const AppHeader(
             title: 'Cart',
             icon: CupertinoIcons.cart,
           ),
@@ -101,7 +102,7 @@ class CartScreen extends ConsumerWidget {
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: AppTheme.cardRadius,
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withValues(alpha: 0.05),
@@ -124,8 +125,8 @@ class CartScreen extends ConsumerWidget {
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: firstItem.orderType == ReservationOrderType.pickup 
-                                                  ? CupertinoColors.systemOrange.withOpacity(0.1) 
-                                                  : const Color(0xFF2C6B6B).withOpacity(0.1),
+                                                  ? AppTheme.pickupColor.withOpacity(0.15) 
+                                                  : AppTheme.restaurantColor.withOpacity(0.15),
                                               borderRadius: BorderRadius.circular(4),
                                             ),
                                             child: Text(
@@ -134,8 +135,8 @@ class CartScreen extends ConsumerWidget {
                                                 fontSize: 12,
                                                 fontWeight: FontWeight.w600,
                                                 color: firstItem.orderType == ReservationOrderType.pickup 
-                                                    ? CupertinoColors.systemOrange
-                                                    : const Color(0xFF2C6B6B),
+                                                    ? AppTheme.pickupColor
+                                                    : AppTheme.restaurantColor,
                                               ),
                                             ),
                                           ),
@@ -177,15 +178,15 @@ class CartScreen extends ConsumerWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text('Total', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                                Text('€${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF2C6B6B))),
+                                Text('€${total.toStringAsFixed(2)}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.darkGreen)),
                               ],
                             ),
                             const SizedBox(height: 16),
                             SizedBox(
                               width: double.infinity,
                               child: CupertinoButton(
-                                color: const Color(0xFF2C6B6B), // Dark Green
-                                borderRadius: BorderRadius.circular(12),
+                                color: AppTheme.darkGreen,
+                                borderRadius: AppTheme.cardRadius,
                                 onPressed: () {
                                   // Checkout Flow
                                 showCupertinoModalPopup(

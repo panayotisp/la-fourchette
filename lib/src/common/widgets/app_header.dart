@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
-class OutlookHeader extends StatelessWidget {
+class AppHeader extends StatelessWidget {
   final String title;
   final Widget? bottomWidget;
   final IconData? icon;
   final Widget? trailing;
   final VoidCallback? onBack;
 
-  const OutlookHeader({
+  const AppHeader({
     super.key,
     required this.title,
     this.bottomWidget,
@@ -25,7 +26,7 @@ class OutlookHeader extends StatelessWidget {
       padding: EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFF2C6B6B), // Dark Green
+        color: AppTheme.darkGreen,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +53,7 @@ class OutlookHeader extends StatelessWidget {
                         color: Colors.white,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, color: const Color(0xFF2C6B6B), size: 24),
+                      child: Icon(icon, color: AppTheme.darkGreen, size: 24),
                     ),
                     const SizedBox(width: 12),
                   ],

@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import '../../../common/widgets/outlook_header.dart';
+import '../../../common/theme/app_theme.dart';
+import '../../../common/widgets/app_header.dart';
 import '../../cart/data/api_reservation_repository.dart';
 import '../../cart/domain/reservation.dart';
 
@@ -17,7 +18,7 @@ class PurchaseHistoryScreen extends ConsumerWidget {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
-          OutlookHeader(
+          AppHeader(
             title: 'History',
             icon: CupertinoIcons.time,
             onBack: () => Navigator.pop(context),
@@ -81,7 +82,7 @@ class _OrderHistoryCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppTheme.cardRadius,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -145,8 +146,8 @@ class _OrderHistoryCard extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: order.orderType == ReservationOrderType.pickup
-                            ? CupertinoColors.systemOrange.withOpacity(0.1)
-                            : CupertinoColors.activeBlue.withOpacity(0.1),
+                            ? AppTheme.pickupColor.withOpacity(0.15)
+                            : AppTheme.restaurantColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -155,8 +156,8 @@ class _OrderHistoryCard extends StatelessWidget {
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                           color: order.orderType == ReservationOrderType.pickup
-                              ? CupertinoColors.systemOrange
-                              : CupertinoColors.activeBlue,
+                              ? AppTheme.pickupColor
+                              : AppTheme.restaurantColor,
                         ),
                       ),
                     ),

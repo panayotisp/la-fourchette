@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../domain/food_item.dart';
+import '../../../common/theme/app_theme.dart';
 import '../../cart/data/api_reservation_repository.dart';
 import '../../cart/domain/reservation.dart';
 import 'food_detail_sheet.dart';
@@ -92,7 +93,7 @@ class _FoodItemCard extends ConsumerWidget {
                       if (hasQuantity)
                         Container(
                           width: 4,
-                          color: const Color(0xFF2C6B6B), // Dark Green - cart indicator
+                          color: AppTheme.darkGreen,
                         ),
                       
                       // 2. Content
@@ -121,7 +122,7 @@ class _FoodItemCard extends ConsumerWidget {
                                           if (hasQuantity)
                                             TextSpan(
                                               text: '$cartQuantity x ',
-                                              style: const TextStyle(color: Color(0xFF2C6B6B)),
+                                              style: const TextStyle(color: AppTheme.darkGreen),
                                             ),
                                           TextSpan(text: item.name),
                                         ],
@@ -133,7 +134,7 @@ class _FoodItemCard extends ConsumerWidget {
                                        style: TextStyle(
                                          fontSize: 15,
                                          fontWeight: FontWeight.bold,
-                                         color: isPast ? CupertinoColors.systemGrey3 : const Color(0xFF2C6B6B),
+                                         color: isPast ? CupertinoColors.systemGrey3 : AppTheme.darkGreen,
                                       ),
                                     ),
                                     if (isPast)
@@ -156,7 +157,7 @@ class _FoodItemCard extends ConsumerWidget {
                               Opacity(
                                 opacity: isPast ? 0.5 : 1.0,
                                 child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: AppTheme.cardRadius,
                                   child: item.imageUrl.startsWith('http') 
                                     ? Image.network(
                                         item.imageUrl,
@@ -222,7 +223,7 @@ class _FoodItemCard extends ConsumerWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         padding: const EdgeInsets.only(left: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C6B6B), // Dark Green
+          color: AppTheme.darkGreen,
           borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerLeft,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../common/theme/app_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../cart/data/api_reservation_repository.dart';
@@ -75,7 +76,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
         
     final Color buttonColor = isRemoveState 
         ? CupertinoColors.destructiveRed 
-        : const Color(0xFF2C6B6B); // Dark Green
+        : AppTheme.darkGreen;
 
     final double totalPrice = widget.item.price * _quantity;
 
@@ -171,7 +172,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                          style: const TextStyle(
                            fontSize: 24,
                            fontWeight: FontWeight.w600,
-                           color: Color(0xFF2C6B6B), // Dark Green
+                           color: AppTheme.darkGreen,
                          ),
                        ),
                      ),
@@ -219,20 +220,20 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                  Container(
                    decoration: BoxDecoration(
                      color: CupertinoColors.systemGrey6,
-                     borderRadius: BorderRadius.circular(12),
+                     borderRadius: AppTheme.cardRadius,
                    ),
                    child: Row(
                      children: [
                        CupertinoButton(
                          padding: const EdgeInsets.symmetric(horizontal: 12),
                          onPressed: _decrement,
-                          child: const Text('-', style: TextStyle(fontSize: 24, color: Color(0xFF2C6B6B))),
+                          child: const Text('-', style: TextStyle(fontSize: 24, color: AppTheme.darkGreen)),
                        ),
                        Text('$_quantity', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                        CupertinoButton(
                          padding: const EdgeInsets.symmetric(horizontal: 12),
                          onPressed: _increment,
-                          child: const Text('+', style: TextStyle(fontSize: 24, color: Color(0xFF2C6B6B))),
+                          child: const Text('+', style: TextStyle(fontSize: 24, color: AppTheme.darkGreen)),
                        ),
                      ],
                    ),
@@ -242,7 +243,7 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                  Expanded(
                    child: CupertinoButton(
                      color: buttonColor,
-                     borderRadius: BorderRadius.circular(12),
+                     borderRadius: AppTheme.cardRadius,
                      onPressed: () {
                        if (isRemoveState) {
                          // Remove Logic

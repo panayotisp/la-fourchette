@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
-import '../../../common/widgets/outlook_header.dart';
+import '../../../common/theme/app_theme.dart';
+import '../../../common/widgets/app_header.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -12,7 +13,7 @@ class HelpSupportScreen extends StatelessWidget {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
-          OutlookHeader(
+          AppHeader(
             title: 'Help & Support',
             icon: CupertinoIcons.question,
             onBack: () => Navigator.pop(context),
@@ -27,7 +28,7 @@ class HelpSupportScreen extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemBackground,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppTheme.cardRadius,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -63,7 +64,7 @@ class HelpSupportScreen extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemBackground,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppTheme.cardRadius,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -126,7 +127,7 @@ class HelpSupportScreen extends StatelessWidget {
           color: CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: const Color(0xFF2C6B6B), size: 24),
+        child: Icon(icon, color: AppTheme.darkGreen, size: 24),
       ),
       title: Text(
         title,

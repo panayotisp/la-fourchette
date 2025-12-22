@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../common/widgets/outlook_header.dart';
+import '../../../common/theme/app_theme.dart';
+import '../../../common/widgets/app_header.dart';
 import 'purchase_history_screen.dart';
 import 'help_support_screen.dart';
 
@@ -13,7 +14,7 @@ class ProfileScreen extends StatelessWidget {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
-          const OutlookHeader(
+          const AppHeader(
             title: 'Profile',
             icon: CupertinoIcons.person,
           ),
@@ -71,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: CupertinoColors.systemBackground,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: AppTheme.cardRadius,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),

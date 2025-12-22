@@ -6,8 +6,18 @@ class AppTheme {
   static const Color darkGreen = Color(0xFF2C6B6B); // Primary dark teal green
   static const Color lightGreen = Color(0xFFB4FF39); // Accent lime green
   
-  static const Color primaryColor = darkGreen; // Changed from blue to dark green
-  static const Color secondaryColor = Color(0xFF5856D6); // iOS Purple
+  // Order Type Colors
+  static const Color restaurantColor = Color(0xFF808000); // Olive for Restaurant
+  static const Color pickupColor = Color(0xFFBA5B18); // Blue for Pickup
+  
+  // Border Radius
+  static const double cardBorderRadius = 12.0;
+  static final BorderRadius cardRadius = BorderRadius.circular(cardBorderRadius);
+  static final BorderRadius smallRadius = BorderRadius.circular(8.0);
+  static final BorderRadius largeRadius = BorderRadius.circular(16.0);
+  
+  static const Color primaryColor = darkGreen;
+  static const Color secondaryColor = lightGreen;
   static const Color scaffoldBackgroundColor = CupertinoColors.systemGroupedBackground;
   
   static final CupertinoThemeData lightTheme = CupertinoThemeData(

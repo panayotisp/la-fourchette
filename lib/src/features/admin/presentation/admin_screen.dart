@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../data/admin_orders_provider.dart';
 import '../../cart/domain/reservation.dart';
-import '../../../common/widgets/outlook_header.dart';
+import '../../../common/widgets/app_header.dart';
+import '../../../common/theme/app_theme.dart';
 
 class AdminScreen extends ConsumerStatefulWidget {
   const AdminScreen({super.key});
@@ -40,7 +41,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       body: Column(
         children: [
-          OutlookHeader(
+          AppHeader(
             title: 'Catering',
             icon: CupertinoIcons.chart_bar_square,
             trailing: CupertinoButton(
@@ -95,8 +96,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                       margin: const EdgeInsets.all(16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2C6B6B).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppTheme.darkGreen.withOpacity(0.1),
+                        borderRadius: AppTheme.cardRadius,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -153,7 +154,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: AppTheme.cardRadius,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -169,7 +170,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: const BoxDecoration(
-              color: Color(0xFF2C6B6B),
+              color: AppTheme.darkGreen,
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -190,15 +191,15 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFB4FF39),
-                    borderRadius: BorderRadius.circular(12),
+                    color: AppTheme.lightGreen,
+                    borderRadius: AppTheme.cardRadius,
                   ),
                   child: Text(
                     '$totalQuantity meals',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C6B6B),
+                      color: AppTheme.darkGreen,
                     ),
                   ),
                 ),
@@ -242,9 +243,9 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               width: 24,
               height: 24,
               decoration: BoxDecoration(
-                color: isDelivered ? const Color(0xFF2C6B6B) : Colors.white,
+                color: isDelivered ? AppTheme.darkGreen : Colors.white,
                 border: Border.all(
-                  color: isDelivered ? const Color(0xFF2C6B6B) : CupertinoColors.systemGrey3,
+                  color: isDelivered ? AppTheme.darkGreen : CupertinoColors.systemGrey3,
                   width: 2,
                 ),
                 borderRadius: BorderRadius.circular(6),
@@ -260,7 +261,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: const Color(0xFF2C6B6B).withOpacity(0.1),
+              color: AppTheme.darkGreen.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
@@ -268,7 +269,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF2C6B6B),
+                color: AppTheme.darkGreen,
               ),
             ),
           ),
@@ -294,8 +295,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: order.orderType == ReservationOrderType.pickup
-                  ? CupertinoColors.systemOrange.withOpacity(0.1)
-                  : const Color(0xFF2C6B6B).withOpacity(0.1),
+                  ? AppTheme.pickupColor.withOpacity(0.15)
+                  : AppTheme.restaurantColor.withOpacity(0.15),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Row(
@@ -307,8 +308,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                       : CupertinoIcons.house,
                   size: 12,
                   color: order.orderType == ReservationOrderType.pickup
-                      ? CupertinoColors.systemOrange
-                      : const Color(0xFF2C6B6B),
+                      ? AppTheme.pickupColor
+                      : AppTheme.restaurantColor,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -317,8 +318,8 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: order.orderType == ReservationOrderType.pickup
-                        ? CupertinoColors.systemOrange
-                        : const Color(0xFF2C6B6B),
+                        ? AppTheme.pickupColor
+                        : AppTheme.restaurantColor,
                   ),
                 ),
               ],
@@ -353,13 +354,13 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFB4FF39),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppTheme.lightGreen,
+                  borderRadius: AppTheme.cardRadius,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(CupertinoIcons.calendar, size: 18, color: Color(0xFF2C6B6B)),
+                    const Icon(CupertinoIcons.calendar, size: 18, color: AppTheme.darkGreen),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -367,7 +368,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C6B6B),
+                          color: AppTheme.darkGreen,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -440,14 +441,14 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
   Widget _buildStatItem(String label, String value, IconData icon) {
     return Column(
       children: [
-        Icon(icon, size: 20, color: const Color(0xFF2C6B6B)),
+        Icon(icon, size: 20, color: AppTheme.darkGreen),
         const SizedBox(height: 4),
         Text(
           value,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF2C6B6B),
+            color: AppTheme.darkGreen,
           ),
         ),
         Text(

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../common/theme/app_theme.dart';
 
 import '../domain/weekly_menu.dart';
 import '../data/api_menu_repository.dart'; // Changed from mock to API
-import '../../../common/widgets/outlook_header.dart'; // Corrected path
+import '../../../common/widgets/app_header.dart'; // Corrected path
 import 'daily_menu_list.dart';
 import '../domain/greek_holidays.dart'; // Fixed import path
 import 'widgets/holiday_view.dart';
@@ -66,7 +67,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
       body: Column(
         children: [
           // Custom Header (Outlook Style)
-          OutlookHeader(
+          AppHeader(
             title: 'Menu',
             icon: CupertinoIcons.book, // Menu icon
             trailing: Text(
@@ -81,7 +82,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
             bottomWidget: Container(
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFB4FF39), // Light Green for background
+                color: AppTheme.lightGreen,
                 borderRadius: BorderRadius.circular(20),
               ),
               padding: const EdgeInsets.all(2),
@@ -119,7 +120,7 @@ class _MenuScreenState extends ConsumerState<MenuScreen> {
                             child: Text(
                               isWide ? day.displayName : _getShortDayName(day),
                               style: TextStyle(
-                                color: isSelected ? const Color(0xFF2C6B6B) : const Color(0xFF2C6B6B).withOpacity(0.7),
+                                color: isSelected ? AppTheme.darkGreen : AppTheme.darkGreen.withOpacity(0.7),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
