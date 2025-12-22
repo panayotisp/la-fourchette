@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'api_reservation_repository.dart';
+part of 'admin_orders_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,36 +9,33 @@ part of 'api_reservation_repository.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(ApiReservationRepository)
-const apiReservationRepositoryProvider = ApiReservationRepositoryProvider._();
+@ProviderFor(AdminOrders)
+const adminOrdersProvider = AdminOrdersProvider._();
 
-final class ApiReservationRepositoryProvider
-    extends
-        $AsyncNotifierProvider<ApiReservationRepository, List<Reservation>> {
-  const ApiReservationRepositoryProvider._()
+final class AdminOrdersProvider
+    extends $AsyncNotifierProvider<AdminOrders, List<Reservation>> {
+  const AdminOrdersProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'apiReservationRepositoryProvider',
-        isAutoDispose: false,
+        name: r'adminOrdersProvider',
+        isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$apiReservationRepositoryHash();
+  String debugGetCreateSourceHash() => _$adminOrdersHash();
 
   @$internal
   @override
-  ApiReservationRepository create() => ApiReservationRepository();
+  AdminOrders create() => AdminOrders();
 }
 
-String _$apiReservationRepositoryHash() =>
-    r'0fcb9f3cb913d3d6e0f1f880a759d11b91025321';
+String _$adminOrdersHash() => r'453312acd59289f037452e1ba5b8a46499caba99';
 
-abstract class _$ApiReservationRepository
-    extends $AsyncNotifier<List<Reservation>> {
+abstract class _$AdminOrders extends $AsyncNotifier<List<Reservation>> {
   FutureOr<List<Reservation>> build();
   @$mustCallSuper
   @override

@@ -6,7 +6,9 @@ enum ReservationOrderType { restaurant, pickup }
 
 class Reservation extends Equatable {
   final String id;
-  final String userId; // For now just distinct ID
+  final String userId; // Email
+  final String? userName; // First name
+  final String? userSurname; // Last name
   final String foodItemId;
   final String foodName; // store snapshot in case menu changes
   final DateTime date;
@@ -15,10 +17,13 @@ class Reservation extends Equatable {
 
   final int quantity;
   final ReservationOrderType orderType;
+  final bool delivered; // Delivery status for admin tracking
 
   const Reservation({
     required this.id,
     required this.userId,
+    this.userName,
+    this.userSurname,
     required this.foodItemId,
     required this.foodName,
     required this.date,
@@ -26,8 +31,9 @@ class Reservation extends Equatable {
     this.status = ReservationStatus.cart,
     this.quantity = 1,
     this.orderType = ReservationOrderType.restaurant,
+    this.delivered = false,
   });
 
   @override
-  List<Object?> get props => [id, userId, foodItemId, foodName, date, price, status, quantity, orderType];
+  List<Object?> get props => [id, userId, userName, userSurname, foodItemId, foodName, date, price, status, quantity, orderType, delivered];
 }

@@ -154,10 +154,58 @@ async function confirmOrder(userEmail) {
     return { success: true };
 }
 
+async function getAllOrdersForAdmin() {
+    const pool = await getConnection();
+
+    const result = await pool.request()
+        .query(`
+            SELECT 
+                o.id,
+                o.user_email,
+                o.user_name,
+                o.user_surname,
+                o.menu_item_id as schedule_id,
+                o.quantity,
+                o.order_type,
+                o.status,
+                o.created_at,
+                w.date as menu_date,
+                w.price,
+                w.name_greek_imported as food_name,
+                f.name_en as food_name_en,
+                f.image_url,
+                o.delivered
+            FROM dbo.Orders o
+            JOIN dbo.WeekMenu w ON o.menu_item_id = w.id
+            LEFT JOIN dbo.FoodLibrary f ON w.food_library_id = f.id
+            WHERE o.status = 'confirmed'
+            ORDER BY w.date DESC, o.created_at DESC
+        `);
+
+    return result.recordset;
+}
+
+async function updateDeliveryStatus(orderId, delivered) {
+    const pool = await getConnection();
+
+    await pool.request()
+        .input('order_id', sql.UniqueIdentifier, orderId)
+        .input('delivered', sql.Bit, delivered)
+        .query(`
+            UPDATE dbo.Orders
+            SET delivered = @delivered
+            WHERE id = @order_id
+        `);
+
+    return { success: true };
+}
+
 module.exports = {
     createOrder,
     getOrdersByUser,
     updateOrder,
     deleteOrder,
-    confirmOrder
+    confirmOrder,
+    getAllOrdersForAdmin,
+    updateDeliveryStatus
 };

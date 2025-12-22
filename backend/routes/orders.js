@@ -115,4 +115,34 @@ router.post('/checkout', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/orders/admin/all
+ * Get all orders for admin dashboard
+ */
+router.get('/admin/all', async (req, res) => {
+    try {
+        const orders = await orderService.getAllOrdersForAdmin();
+        res.json(orders);
+    } catch (error) {
+        console.error('Error fetching admin orders:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * PATCH /api/orders/:id/delivery-status
+ * Update delivery status of an order
+ */
+router.patch('/:id/delivery-status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { delivered } = req.body;
+        await orderService.updateDeliveryStatus(id, delivered);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error updating delivery status:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
