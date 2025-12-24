@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../features/auth/presentation/splash_screen.dart';
 import '../features/auth/presentation/role_selection_screen.dart';
 import '../features/admin/presentation/admin_screen.dart';
 import '../common/widgets/main_scaffold.dart';
@@ -15,6 +16,10 @@ GoRouter goRouter(Ref ref) {
     routes: [
       GoRoute(
         path: '/',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/role-select',
         builder: (context, state) => const RoleSelectionScreen(),
       ),
       GoRoute(

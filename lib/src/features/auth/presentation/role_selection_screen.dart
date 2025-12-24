@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../data/auth_provider.dart';
 
 class RoleSelectionScreen extends ConsumerWidget {
   const RoleSelectionScreen({super.key});
@@ -25,14 +26,34 @@ class RoleSelectionScreen extends ConsumerWidget {
               title: 'Employee',
               subtitle: 'Reserve food',
               icon: CupertinoIcons.person_solid,
-              onPressed: () => context.go('/menu'),
+              onPressed: () {
+                // Set auth state as employee
+                AuthService.setAuthState(AuthState(
+                  isAuthenticated: true,
+                  userEmail: 'employee@example.com',
+                  userName: 'Employee',
+                  userSurname: 'User',
+                  role: UserRole.employee,
+                ));
+                context.go('/menu');
+              },
             ),
             const SizedBox(height: 20),
             _RoleButton(
               title: 'Catering',
               subtitle: 'Admin Dashboard',
               icon: CupertinoIcons.chart_bar_alt_fill,
-              onPressed: () => context.go('/admin'),
+              onPressed: () {
+                // Set auth state as admin
+                AuthService.setAuthState(AuthState(
+                  isAuthenticated: true,
+                  userEmail: 'admin@example.com',
+                  userName: 'Admin',
+                  userSurname: 'User',
+                  role: UserRole.admin,
+                ));
+                context.go('/admin');
+              },
             ),
           ],
         ),

@@ -37,19 +37,30 @@ async function createOrder(orderData) {
             status: 'cart'
         };
     } else {
-        // 3. Insert new: Existing logic
+        // 3. Insert new: Get delivery_date from WeekMenu first
+        const menuResult = await pool.request()
+            .input('menu_item_id', sql.UniqueIdentifier, orderData.schedule_id)
+            .query('SELECT date FROM dbo.WeekMenu WHERE id = @menu_item_id');
+
+        if (menuResult.recordset.length === 0) {
+            throw new Error('Menu item not found');
+        }
+
+        const deliveryDate = menuResult.recordset[0].date;
+
         const result = await pool.request()
             .input('user_email', sql.NVarChar, orderData.user_email)
             .input('user_name', sql.NVarChar, orderData.user_name)
             .input('user_surname', sql.NVarChar, orderData.user_surname)
             .input('menu_item_id', sql.UniqueIdentifier, orderData.schedule_id)
+            .input('delivery_date', sql.Date, deliveryDate)
             .input('quantity', sql.Int, orderData.quantity)
             .input('order_type', sql.NVarChar, orderData.order_type)
             .input('status', sql.NVarChar, 'cart')
             .query(`
-                INSERT INTO dbo.Orders (user_email, user_name, user_surname, menu_item_id, quantity, order_type, status)
+                INSERT INTO dbo.Orders (user_email, user_name, user_surname, menu_item_id, delivery_date, quantity, order_type, status)
                 OUTPUT INSERTED.id
-                VALUES (@user_email, @user_name, @user_surname, @menu_item_id, @quantity, @order_type, @status)
+                VALUES (@user_email, @user_name, @user_surname, @menu_item_id, @delivery_date, @quantity, @order_type, @status)
             `);
 
         return result.recordset[0];
@@ -59,16 +70,14 @@ async function createOrder(orderData) {
 async function getOrdersByUser(userEmail) {
     const pool = await getConnection();
 
-    // Auto-cleanup: Delete 'cart' items from the past
+    // Auto-cleanup: Delete 'cart' items from the past using delivery_date
     await pool.request()
         .input('user_email_del', sql.NVarChar, userEmail)
         .query(`
-            DELETE o
-            FROM dbo.Orders o
-            JOIN dbo.WeekMenu w ON o.menu_item_id = w.id
-            WHERE o.user_email = @user_email_del
-              AND o.status = 'cart'
-              AND w.date < CAST(GETDATE() AS DATE)
+            DELETE FROM dbo.Orders
+            WHERE user_email = @user_email_del
+              AND status = 'cart'
+              AND delivery_date < CAST(GETDATE() AS DATE)
         `);
 
     const result = await pool.request()
@@ -80,11 +89,11 @@ async function getOrdersByUser(userEmail) {
                 o.user_name,
                 o.user_surname,
                 o.menu_item_id as schedule_id,
+                o.delivery_date as menu_date,
                 o.quantity,
                 o.order_type,
                 o.status,
                 o.created_at,
-                w.date as menu_date,
                 w.price,
                 w.name_greek_imported as food_name,
                 f.name_en as food_name_en,
@@ -165,11 +174,11 @@ async function getAllOrdersForAdmin() {
                 o.user_name,
                 o.user_surname,
                 o.menu_item_id as schedule_id,
+                o.delivery_date as menu_date,
                 o.quantity,
                 o.order_type,
                 o.status,
                 o.created_at,
-                w.date as menu_date,
                 w.price,
                 w.name_greek_imported as food_name,
                 f.name_en as food_name_en,
@@ -179,7 +188,7 @@ async function getAllOrdersForAdmin() {
             JOIN dbo.WeekMenu w ON o.menu_item_id = w.id
             LEFT JOIN dbo.FoodLibrary f ON w.food_library_id = f.id
             WHERE o.status = 'confirmed'
-            ORDER BY w.date DESC, o.created_at DESC
+            ORDER BY o.delivery_date DESC, o.created_at DESC
         `);
 
     return result.recordset;

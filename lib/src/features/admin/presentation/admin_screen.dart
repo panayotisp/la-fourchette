@@ -44,6 +44,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
           AppHeader(
             title: 'Catering',
             icon: CupertinoIcons.chart_bar_square,
+            compact: true,
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () {
@@ -89,41 +90,38 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 final totalOrders = dayOrders.length;
                 final completedOrders = dayOrders.where((order) => order.delivered).length;
 
-                return Column(
-                  children: [
-                    // Summary Statistics
-                    Container(
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppTheme.darkGreen.withOpacity(0.1),
-                        borderRadius: AppTheme.cardRadius,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildStatItem('Orders', totalOrders.toString(), CupertinoIcons.doc_text),
-                          Container(width: 1, height: 40, color: CupertinoColors.separator),
-                          _buildStatItem('Completed', completedOrders.toString(), CupertinoIcons.checkmark_circle),
-                        ],
-                      ),
-                    ),
-
-                    // Food Groups List
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 40),
-                        itemCount: groupedByFood.length,
-                        itemBuilder: (context, index) {
-                          final foodName = groupedByFood.keys.elementAt(index);
-                          final foodOrders = groupedByFood[foodName]!;
-                          final totalQuantity = foodOrders.fold(0, (sum, order) => sum + order.quantity);
-                          
-                          return _buildFoodGroupCard(foodName, foodOrders, totalQuantity);
-                        },
-                      ),
-                    ),
-                  ],
+                return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  itemCount: groupedByFood.length + 1, // +1 for statistics header
+                  itemBuilder: (context, index) {
+                    // First item is the statistics dashboard
+                    if (index == 0) {
+                      return Container(
+                        margin: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.darkGreen.withOpacity(0.1),
+                          borderRadius: AppTheme.cardRadius,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStatItem('Orders', totalOrders.toString(), CupertinoIcons.doc_text),
+                            Container(width: 1, height: 40, color: CupertinoColors.separator),
+                            _buildStatItem('Completed', completedOrders.toString(), CupertinoIcons.checkmark_circle),
+                          ],
+                        ),
+                      );
+                    }
+                    
+                    // Remaining items are food groups
+                    final foodIndex = index - 1;
+                    final foodName = groupedByFood.keys.elementAt(foodIndex);
+                    final foodOrders = groupedByFood[foodName]!;
+                    final totalQuantity = foodOrders.fold(0, (sum, order) => sum + order.quantity);
+                    
+                    return _buildFoodGroupCard(foodName, foodOrders, totalQuantity);
+                  },
                 );
               },
               loading: () => const Center(child: CupertinoActivityIndicator()),
@@ -313,7 +311,7 @@ class _AdminScreenState extends ConsumerState<AdminScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  order.orderType == ReservationOrderType.pickup ? 'Pickup' : 'Rest.',
+                  order.orderType == ReservationOrderType.pickup ? 'Pickup' : 'Restaurant',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,

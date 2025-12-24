@@ -8,6 +8,7 @@ class AppHeader extends StatelessWidget {
   final IconData? icon;
   final Widget? trailing;
   final VoidCallback? onBack;
+  final bool compact; // For admin screen
 
   const AppHeader({
     super.key,
@@ -16,6 +17,7 @@ class AppHeader extends StatelessWidget {
     this.icon,
     this.trailing,
     this.onBack,
+    this.compact = false,
   });
 
   @override
@@ -23,7 +25,9 @@ class AppHeader extends StatelessWidget {
     final topPadding = MediaQuery.of(context).padding.top;
 
     return Container(
-      padding: EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
+      padding: compact 
+          ? EdgeInsets.only(top: topPadding + 8, bottom: 12, left: 16, right: 16)
+          : EdgeInsets.only(top: topPadding + 10, bottom: 20, left: 16, right: 16),
       width: double.infinity,
       decoration: const BoxDecoration(
         color: AppTheme.darkGreen,
