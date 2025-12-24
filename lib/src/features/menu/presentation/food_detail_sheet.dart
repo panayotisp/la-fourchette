@@ -20,7 +20,17 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   int _initialCartQuantity = 0;
   bool _isInit = true;
   ReservationOrderType _selectedOrderType = ReservationOrderType.restaurant;
-  ReservationOrderType _initialOrderType = ReservationOrderType.restaurant; // To track changes
+  ReservationOrderType _initialOrderType = ReservationOrderType.restaurant;
+  
+  // Split delivery quantities (used when _quantity >= 2)
+  int _restaurantQuantity = 1;
+  int _pickupQuantity = 0;
+  bool _isSplitMode = false;
+  
+  // Initial state tracking (for change detection)
+  bool _initialSplitMode = false;
+  int _initialRestaurantQuantity = 0;
+  int _initialPickupQuantity = 0;
 
   @override
   void didChangeDependencies() {
@@ -33,10 +43,34 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
         if (count > 0) {
           _initialCartQuantity = count;
           _quantity = count;
-          // Set initial order type from existing reservation (take the first one)
-          if (existingItems.isNotEmpty) {
-            _selectedOrderType = existingItems.first.orderType;
-            _initialOrderType = existingItems.first.orderType;
+          
+          // Check if there are multiple order types (split delivery)
+          final orderTypes = existingItems.map((r) => r.orderType).toSet();
+          final hasSplitOrders = orderTypes.length > 1;
+          
+          if (hasSplitOrders) {
+            // Enable split mode and set quantities
+            setState(() {
+              _isSplitMode = true;
+              _initialSplitMode = true;
+              
+              _restaurantQuantity = existingItems
+                  .where((r) => r.orderType == ReservationOrderType.restaurant)
+                  .fold(0, (sum, r) => sum + r.quantity);
+              _initialRestaurantQuantity = _restaurantQuantity;
+              
+              _pickupQuantity = existingItems
+                  .where((r) => r.orderType == ReservationOrderType.pickup)
+                  .fold(0, (sum, r) => sum + r.quantity);
+              _initialPickupQuantity = _pickupQuantity;
+            });
+          } else {
+            // Single order type - set initial order type from existing reservation
+            if (existingItems.isNotEmpty) {
+              _selectedOrderType = existingItems.first.orderType;
+              _initialOrderType = existingItems.first.orderType;
+              _initialSplitMode = false;
+            }
           }
         }
       });
@@ -45,36 +79,112 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
   }
 
   void _increment() {
-    setState(() => _quantity++);
+    setState(() {
+      _quantity++;
+      // Only auto-adjust split quantities if NOT in split mode
+      if (!_isSplitMode && _quantity >= 2) {
+        _restaurantQuantity = _quantity;
+        _pickupQuantity = 0;
+      }
+    });
   }
 
   void _decrement() {
     if (_quantity > 1) {
-      setState(() => _quantity--);
+      setState(() {
+        _quantity--;
+        // Only auto-adjust split quantities if NOT in split mode
+        if (!_isSplitMode) {
+          // Keep split quantities in sync with total
+          if (_restaurantQuantity > _quantity) {
+            _restaurantQuantity = _quantity;
+          }
+          if (_pickupQuantity > _quantity) {
+            _pickupQuantity = 0;
+          }
+        }
+      });
     }
+  }
+  
+  void _incrementRestaurant() {
+    if (_restaurantQuantity < _quantity) {
+      setState(() {
+        _restaurantQuantity++;
+        // Auto-decrement pickup to maintain total
+        if (_pickupQuantity > 0) {
+          _pickupQuantity--;
+        }
+      });
+    }
+  }
+  
+  void _decrementRestaurant() {
+    if (_restaurantQuantity > 0) {
+      setState(() {
+        _restaurantQuantity--;
+        // Auto-increment pickup to maintain total
+        if (_restaurantQuantity + _pickupQuantity < _quantity) {
+          _pickupQuantity++;
+        }
+      });
+    }
+  }
+  
+  void _incrementPickup() {
+    if (_pickupQuantity < _quantity) {
+      setState(() {
+        _pickupQuantity++;
+        // Auto-decrement restaurant to maintain total
+        if (_restaurantQuantity > 0) {
+          _restaurantQuantity--;
+        }
+      });
+    }
+  }
+  
+  void _decrementPickup() {
+    if (_pickupQuantity > 0) {
+      setState(() {
+        _pickupQuantity--;
+        // Auto-increment restaurant to maintain total
+        if (_restaurantQuantity + _pickupQuantity < _quantity) {
+          _restaurantQuantity++;
+        }
+      });
+    }
+  }
+  
+  // Unified change detection
+  bool _hasChanges() {
+    // Quantity changed
+    if (_quantity != _initialCartQuantity) return true;
+    
+    // Mode changed (split ↔ single)
+    if (_isSplitMode != _initialSplitMode) return true;
+    
+    // In split mode: check split quantities
+    if (_isSplitMode) {
+      if (_restaurantQuantity != _initialRestaurantQuantity) return true;
+      if (_pickupQuantity != _initialPickupQuantity) return true;
+    }
+    
+    // In single mode: check order type
+    if (!_isSplitMode && _selectedOrderType != _initialOrderType) return true;
+    
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Determine Button State
-    // 1. New Item (not in cart) -> "Add to order" (Blue)
-    // 2. In Cart, Quantity Unchanged -> "Remove" (Red)
-    // 3. In Cart, Quantity Changed -> "Update order" (Blue)
-    
     final bool isInCart = _initialCartQuantity > 0;
-    final bool isQuantityChanged = _quantity != _initialCartQuantity;
-    final bool isOrderTypeChanged = _selectedOrderType != _initialOrderType;
+    final bool hasChanges = _hasChanges();
     
-    final bool isRemoveState = isInCart && !isQuantityChanged && !isOrderTypeChanged;
-    // Update if in cart and (quantity changed OR type changed)
-    final bool isUpdateState = isInCart && (isQuantityChanged || isOrderTypeChanged);
-    
-    // Logic for button
-    final String buttonText = isRemoveState 
+    final String buttonText = isInCart && !hasChanges
         ? 'Remove' 
-        : (isUpdateState ? 'Update order' : 'Add to order');
+        : (isInCart && hasChanges ? 'Update order' : 'Add to order');
         
-    final Color buttonColor = isRemoveState 
+    final Color buttonColor = isInCart && !hasChanges
         ? CupertinoColors.destructiveRed 
         : AppTheme.darkGreen;
 
@@ -177,31 +287,74 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                        ),
                      ),
 
-                     // Order Type Selector
-                     Padding(
-                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                       child: SizedBox(
-                         width: double.infinity,
-                         child: CupertinoSlidingSegmentedControl<ReservationOrderType>(
-                           groupValue: _selectedOrderType,
-                           children: const {
-                             ReservationOrderType.restaurant: Padding(
-                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                               child: Text('Restaurant'),
-                             ),
-                             ReservationOrderType.pickup: Padding(
-                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                               child: Text('Pickup'),
-                             ),
-                           },
-                           onValueChanged: (value) {
-                             if (value != null) {
-                               setState(() => _selectedOrderType = value);
-                             }
-                           },
-                         ),
-                       ),
-                     ),
+                      // Order Type Selector
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                        child: Column(
+                          children: [
+                            // Show Restaurant/Pickup selector only when split mode is OFF
+                            if (!_isSplitMode)
+                              SizedBox(
+                                width: double.infinity,
+                                child: CupertinoSlidingSegmentedControl<ReservationOrderType>(
+                                  groupValue: _selectedOrderType,
+                                  children: const {
+                                    ReservationOrderType.restaurant: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                      child: Text('Restaurant'),
+                                    ),
+                                    ReservationOrderType.pickup: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                      child: Text('Pickup'),
+                                    ),
+                                  },
+                                  onValueChanged: (value) {
+                                    if (value != null) {
+                                      setState(() => _selectedOrderType = value);
+                                    }
+                                  },
+                                ),
+                              ),
+                            
+                            // Show split delivery toggle when quantity >= 2
+                            if (_quantity >= 2) ...[
+                              if (!_isSplitMode) const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  const Text(
+                                    'Split Delivery',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  CupertinoSwitch(
+                                    value: _isSplitMode,
+                                    activeColor: AppTheme.darkGreen,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isSplitMode = value;
+                                        if (value) {
+                                          // Initialize split with all to restaurant
+                                          _restaurantQuantity = _quantity;
+                                          _pickupQuantity = 0;
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                              
+                              // Show split UI when toggle is ON
+                              if (_isSplitMode) ...[
+                                const SizedBox(height: 16),
+                                _buildSplitDeliverySelector(),
+                              ],
+                            ],
+                          ],
+                        ),
+                      ),
                    ],
                  ),
                ),
@@ -244,37 +397,10 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
                    child: CupertinoButton(
                      color: buttonColor,
                      borderRadius: AppTheme.cardRadius,
-                     onPressed: () {
-                       if (isRemoveState) {
-                         // Remove Logic
-                         ref.read(apiReservationRepositoryProvider.notifier).removeReservation(
-                           foodItemId: widget.item.id,
-                         );
-                       } else if (isUpdateState) {
-                         // Update Logic (Item exists)
-                         ref.read(apiReservationRepositoryProvider.notifier).updateReservation(
-                            userId: 'current_user',
-                            foodItemId: widget.item.id,
-                            foodName: widget.item.name,
-                            date: DateTime.now(),
-                            price: widget.item.price,
-                            newQuantity: _quantity, 
-                            newOrderType: _selectedOrderType == ReservationOrderType.pickup ? 'pickup' : 'restaurant',
-                         );
-                       } else {
-                         // Add Logic (New Item)
-                         ref.read(apiReservationRepositoryProvider.notifier).addReservation(
-                            userId: 'current_user',
-                            foodItemId: widget.item.id,
-                            foodName: widget.item.name,
-                            date: DateTime.now(),
-                            price: widget.item.price,
-                            quantity: _quantity,
-                            orderType: _selectedOrderType == ReservationOrderType.pickup ? 'pickup' : 'restaurant',
-                         );
-                       }
-                       Navigator.pop(context);
-                     },
+                     onPressed: () async {
+                        await _submitOrder();
+                        Navigator.pop(context);
+                      },
                      child: Row(
                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                        children: [
@@ -302,5 +428,201 @@ class _FoodDetailSheetState extends ConsumerState<FoodDetailSheet> {
         ],
       ),
     );
-  }
+   }
+   
+   // Split Delivery Selector Widget (shown when toggle is ON)
+   Widget _buildSplitDeliverySelector() {
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         // Restaurant Row
+         _buildDeliveryTypeRow(
+           label: 'Restaurant',
+           quantity: _restaurantQuantity,
+           color: AppTheme.restaurantColor,
+           onIncrement: _incrementRestaurant,
+           onDecrement: _decrementRestaurant,
+         ),
+         const SizedBox(height: 12),
+         
+         // Pickup Row
+         _buildDeliveryTypeRow(
+           label: 'Pickup',
+           quantity: _pickupQuantity,
+           color: AppTheme.pickupColor,
+           onIncrement: _incrementPickup,
+           onDecrement: _decrementPickup,
+         ),
+       ],
+     );
+   }
+   
+   Widget _buildDeliveryTypeRow({
+     required String label,
+     required int quantity,
+     required Color color,
+     required VoidCallback onIncrement,
+     required VoidCallback onDecrement,
+   }) {
+     final double price = widget.item.price * quantity;
+     
+     return Container(
+       padding: const EdgeInsets.all(12),
+       decoration: BoxDecoration(
+         color: color.withOpacity(0.1),
+         borderRadius: AppTheme.cardRadius,
+         border: Border.all(
+           color: color.withOpacity(0.3),
+           width: 1,
+         ),
+       ),
+       child: Row(
+         children: [
+           // Color indicator
+           Container(
+             width: 4,
+             height: 40,
+             decoration: BoxDecoration(
+               color: color,
+               borderRadius: BorderRadius.circular(2),
+             ),
+           ),
+           const SizedBox(width: 12),
+           
+           // Label
+           Expanded(
+             child: Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text(
+                   label,
+                   style: const TextStyle(
+                     fontSize: 15,
+                     fontWeight: FontWeight.w600,
+                   ),
+                 ),
+                 Text(
+                   '€${price.toStringAsFixed(2)}',
+                   style: TextStyle(
+                     fontSize: 13,
+                     color: color,
+                     fontWeight: FontWeight.w600,
+                   ),
+                 ),
+               ],
+             ),
+           ),
+           
+           // Quantity controls
+           Container(
+             decoration: BoxDecoration(
+               color: CupertinoColors.systemBackground,
+               borderRadius: BorderRadius.circular(8),
+             ),
+             child: Row(
+               children: [
+                 CupertinoButton(
+                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                   onPressed: quantity > 0 ? onDecrement : null,
+                   child: Icon(
+                     CupertinoIcons.minus,
+                     size: 18,
+                     color: quantity > 0 ? AppTheme.darkGreen : CupertinoColors.systemGrey3,
+                   ),
+                 ),
+                 Container(
+                   padding: const EdgeInsets.symmetric(horizontal: 12),
+                   child: Text(
+                     '$quantity',
+                     style: const TextStyle(
+                       fontSize: 16,
+                       fontWeight: FontWeight.w600,
+                     ),
+                   ),
+                 ),
+                 CupertinoButton(
+                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                   onPressed: onIncrement,
+                   child: const Icon(
+                     CupertinoIcons.plus,
+                     size: 18,
+                     color: AppTheme.darkGreen,
+                   ),
+                 ),
+               ],
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+   
+   // Unified order submission
+   Future<void> _submitOrder() async {
+     final isInCart = _initialCartQuantity > 0;
+     final hasChanges = _hasChanges();
+     
+     if (isInCart && !hasChanges) {
+       // Remove all orders
+       await _removeAllOrders();
+     } else {
+       // Add or Update
+       if (isInCart) {
+         // Remove existing first
+         await _removeAllOrders();
+         await Future.delayed(const Duration(milliseconds: 100));
+       }
+       
+       // Add new orders based on current state
+       if (_isSplitMode) {
+         await _addSplitOrders();
+       } else {
+         await _addSingleOrder();
+       }
+     }
+   }
+   
+   Future<void> _removeAllOrders() async {
+     ref.read(apiReservationRepositoryProvider.notifier).removeReservation(
+       foodItemId: widget.item.id,
+     );
+   }
+   
+   Future<void> _addSplitOrders() async {
+     if (_restaurantQuantity > 0) {
+       ref.read(apiReservationRepositoryProvider.notifier).addReservation(
+         userId: 'current_user',
+         foodItemId: widget.item.id,
+         foodName: widget.item.name,
+         date: DateTime.now(),
+         price: widget.item.price,
+         quantity: _restaurantQuantity,
+         orderType: 'restaurant',
+       );
+     }
+     
+     if (_pickupQuantity > 0) {
+       ref.read(apiReservationRepositoryProvider.notifier).addReservation(
+         userId: 'current_user',
+         foodItemId: widget.item.id,
+         foodName: widget.item.name,
+         date: DateTime.now(),
+         price: widget.item.price,
+         quantity: _pickupQuantity,
+         orderType: 'pickup',
+       );
+     }
+   }
+   
+   Future<void> _addSingleOrder() async {
+     ref.read(apiReservationRepositoryProvider.notifier).addReservation(
+       userId: 'current_user',
+       foodItemId: widget.item.id,
+       foodName: widget.item.name,
+       date: DateTime.now(),
+       price: widget.item.price,
+       quantity: _quantity,
+       orderType: _selectedOrderType == ReservationOrderType.pickup ? 'pickup' : 'restaurant',
+     );
+   }
 }

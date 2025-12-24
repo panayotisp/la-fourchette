@@ -94,8 +94,18 @@ class CartScreen extends ConsumerWidget {
                             ...groupedItems.keys.map((itemId) {
                               final items = groupedItems[itemId]!;
                               final firstItem = items.first;
-                              final quantity = items.fold(0, (sum, r) => sum + r.quantity);
-                              final itemTotal = firstItem.price * quantity;
+                              final totalQuantity = items.fold(0, (sum, r) => sum + r.quantity);
+                              final itemTotal = items.fold(0.0, (sum, r) => sum + (r.price * r.quantity));
+                              
+                              // Check if there are multiple order types (split delivery)
+                              final hasMultipleTypes = items.map((r) => r.orderType).toSet().length > 1;
+                              
+                              // Group by order type for split display
+                              final restaurantItems = items.where((r) => r.orderType == ReservationOrderType.restaurant).toList();
+                              final pickupItems = items.where((r) => r.orderType == ReservationOrderType.pickup).toList();
+                              
+                              final restaurantQty = restaurantItems.fold(0, (sum, r) => sum + r.quantity);
+                              final pickupQty = pickupItems.fold(0, (sum, r) => sum + r.quantity);
 
                               return Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -119,27 +129,86 @@ class CartScreen extends ConsumerWidget {
                                         children: [
                                           Text(firstItem.foodName, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 17)),
                                           const SizedBox(height: 6),
-                                          Text('${quantity}x €${firstItem.price.toStringAsFixed(2)}', style: const TextStyle(color: CupertinoColors.secondaryLabel, fontSize: 15)),
-                                          const SizedBox(height: 4),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: firstItem.orderType == ReservationOrderType.pickup 
-                                                  ? AppTheme.pickupColor.withOpacity(0.15) 
-                                                  : AppTheme.restaurantColor.withOpacity(0.15),
-                                              borderRadius: BorderRadius.circular(4),
+                                          Text('${totalQuantity}x €${firstItem.price.toStringAsFixed(2)}', style: const TextStyle(color: CupertinoColors.secondaryLabel, fontSize: 15)),
+                                          const SizedBox(height: 8),
+                                          
+                                          // Show split delivery labels if multiple types
+                                          if (hasMultipleTypes) ...[
+                                            Row(
+                                              children: [
+                                                if (restaurantQty > 0) ...[
+                                                  Text(
+                                                    '${restaurantQty}x ',
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: CupertinoColors.secondaryLabel,
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: AppTheme.restaurantColor.withOpacity(0.15),
+                                                      borderRadius: BorderRadius.circular(4),
+                                                    ),
+                                                    child: const Text(
+                                                      'Restaurant',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: AppTheme.restaurantColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                ],
+                                                if (pickupQty > 0) ...[
+                                                  Text(
+                                                    '${pickupQty}x ',
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                      color: CupertinoColors.secondaryLabel,
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: AppTheme.pickupColor.withOpacity(0.15),
+                                                      borderRadius: BorderRadius.circular(4),
+                                                    ),
+                                                    child: const Text(
+                                                      'Pickup',
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: AppTheme.pickupColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
                                             ),
-                                            child: Text(
-                                              firstItem.orderType == ReservationOrderType.pickup ? 'Pickup' : 'Restaurant',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
+                                          ] else ...[
+                                            // Single order type - show as before
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
                                                 color: firstItem.orderType == ReservationOrderType.pickup 
-                                                    ? AppTheme.pickupColor
-                                                    : AppTheme.restaurantColor,
+                                                    ? AppTheme.pickupColor.withOpacity(0.15) 
+                                                    : AppTheme.restaurantColor.withOpacity(0.15),
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: Text(
+                                                firstItem.orderType == ReservationOrderType.pickup ? 'Pickup' : 'Restaurant',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: firstItem.orderType == ReservationOrderType.pickup 
+                                                      ? AppTheme.pickupColor
+                                                      : AppTheme.restaurantColor,
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                          ],
                                         ],
                                       ),
                                     ),
